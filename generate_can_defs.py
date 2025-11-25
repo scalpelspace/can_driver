@@ -213,7 +213,7 @@ def generate_header(output_filename: str):
         out.write(
             "/** Includes. *****************************************************************/\n\n"
         )
-        out.write('#include "can_driver.h"\n\n')
+        out.write('#include "can_driver/can_driver.h"\n\n')
 
         out.write(
             "/** CPP guard open. ***********************************************************/\n\n"
