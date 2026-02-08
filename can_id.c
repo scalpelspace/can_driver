@@ -51,8 +51,8 @@ enum {
 
 /** Private functions. ********************************************************/
 
-static bool can_id_fields_valid(const uint8_t priority,
-                                const uint8_t message_type,
+static bool can_id_fields_valid(const can_priority_t priority,
+                                const can_message_type_t message_type,
                                 const uint8_t node_id) {
   if (priority > CAN_ID_PRIORITY_MAX)
     return false;
@@ -65,8 +65,9 @@ static bool can_id_fields_valid(const uint8_t priority,
 
 /** Public functions. *********************************************************/
 
-bool can_id_pack(const uint8_t priority, const uint8_t message_type,
-                 const uint8_t node_id, uint16_t *out_can_id) {
+bool can_id_pack(const can_priority_t priority,
+                 const can_message_type_t message_type, const uint8_t node_id,
+                 uint16_t *out_can_id) {
   if (out_can_id == NULL)
     return false;
   if (!can_id_fields_valid(priority, message_type, node_id))
@@ -85,8 +86,8 @@ bool can_id_pack(const uint8_t priority, const uint8_t message_type,
   return true;
 }
 
-bool can_id_unpack(const uint16_t can_id, uint8_t *out_priority,
-                   uint8_t *out_message_type, uint8_t *out_node_id) {
+bool can_id_unpack(const uint16_t can_id, can_priority_t *out_priority,
+                   can_message_type_t *out_message_type, uint8_t *out_node_id) {
   if (can_id > CAN_ID_STD_MAX)
     return false;
 
