@@ -10,9 +10,11 @@ Low level simplified CAN bus (classic) communication drivers.
   <summary>Table of Contents</summary>
 
 <!-- TOC -->
+
 * [can_driver](#can_driver)
-  * [1 CAN Bus Drivers](#1-can-bus-drivers)
-  * [2 CAN ID ScalpelSpace Node Scheme](#2-can-id-scalpelspace-node-scheme)
+    * [1 CAN Bus Drivers](#1-can-bus-drivers)
+    * [2 CAN ID ScalpelSpace Node Scheme](#2-can-id-scalpelspace-node-scheme)
+
 <!-- TOC -->
 
 </details>
@@ -55,11 +57,13 @@ fields are allocated to support message arbitration and node identification.
 
 The following table outlines the 11-bit allocation for the 3 fields:
 
-|                | 0  | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9 | 10 |
-|----------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:-:|:--:|
-| `priority`     |    |    |    |    |    |    |    |    |    | p | p  |
-| `message_type` |    |    |    |    |    | mt | mt | mt | mt |   |    |
-| `node_id`      | ni | ni | ni | ni | ni |    |    |    |    |   |    |
+| Bit index      | 10 | 9 | 8  | 7  | 6  | 5  | 4  | 3  | 2  | 1  | 0  |
+|----------------|:--:|:-:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| `priority`     | p  | p |    |    |    |    |    |    |    |    |    |
+| `message_type` |    |   | mt | mt | mt | mt |    |    |    |    |    |
+| `node_id`      |    |   |    |    |    |    | ni | ni | ni | ni | ni |
+
+- Bit index 10 = MSB, 0 = LSB.
 
 Drivers are implemented in the following files:
 
