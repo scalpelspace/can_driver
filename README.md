@@ -65,3 +65,6 @@ Drivers are implemented in the following files:
 
 1. [can_id.c](can_id.c)
 2. [can_id.h](can_id.h)
+
+- To create a merged DBC file from multiple sources (git repos)
+  [generate_merged_dbc.py](generate_merged_dbc.py) is used.

@@ -24,4 +24,7 @@
 ## [v0.2.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.2.0)
 
 - Transition to node-addressed CAN ID scheme.
-  - Add `can_id.c`, `can_id.h`.
+    - Add [`can_id.c`](can_id.c) and [`can_id.h`](can_id.h).
+- Add merged DBC python script [
+  `generate_merged_dbc.py`](generate_merged_dbc.py).
+- Improve QOL print messages in [`generate_can_defs.py`](generate_can_defs.py).
