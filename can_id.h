@@ -30,8 +30,8 @@ extern "C" {
 /** Definitions. **************************************************************/
 
 // Reserved Node IDs.
-#define CAN_ID_NODE_ID_UNASSIGNED (0U)
-#define CAN_ID_NODE_ID_BROADCAST (31U)
+#define CAN_ID_NODE_ID_UNASSIGNED (0u)
+#define CAN_ID_NODE_ID_BROADCAST (31u)
 
 /** Public types. *************************************************************/
 

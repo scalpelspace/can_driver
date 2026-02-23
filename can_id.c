@@ -25,17 +25,17 @@
 #define MESSAGE_ID_MASK ((uint16_t)MESSAGE_ID_MAX)
 
 // Shifts.
-#define NODE_ID_SHIFT (0U)
+#define NODE_ID_SHIFT (0u)
 #define MESSAGE_ID_SHIFT (NODE_BITS) // 5.
 
 /** Private types. ************************************************************/
 
 enum {
-  MESSAGE_ID_BITS = 6U,
-  NODE_BITS = 5U,
+  MESSAGE_ID_BITS = 6u,
+  NODE_BITS = 5u,
 
-  NODE_MAX = (1U << NODE_BITS) - 1U,             // 31.
-  MESSAGE_ID_MAX = (1U << MESSAGE_ID_BITS) - 1U, // 63.
+  NODE_MAX = (1u << NODE_BITS) - 1u,             // 31.
+  MESSAGE_ID_MAX = (1u << MESSAGE_ID_BITS) - 1u, // 63.
 
   STD_MAX = 0x7FFU
 };
@@ -60,7 +60,7 @@ bool can_id_pack(const can_message_id_t message_id, const can_node_id_t node_id,
   if (!can_id_fields_valid(message_id, node_id))
     return false;
 
-  can_id_t id = 0U;
+  can_id_t id = 0u;
   id |= ((can_id_t)(message_id & MESSAGE_ID_MASK) << MESSAGE_ID_SHIFT);
   id |= ((can_id_t)(node_id & NODE_ID_MASK) << NODE_ID_SHIFT);
 
@@ -86,14 +86,14 @@ bool can_id_unpack(const can_id_t can_id, can_message_id_t *out_message_id,
 }
 
 bool can_id_is_unassigned(const can_id_t can_id) {
-  can_node_id_t node = 0U;
+  can_node_id_t node = 0u;
   if (!can_id_unpack(can_id, NULL, &node))
     return false;
   return (node == (can_node_id_t)CAN_ID_NODE_ID_UNASSIGNED);
 }
 
 bool can_id_is_broadcast(const can_id_t can_id) {
-  can_node_id_t node = 0U;
+  can_node_id_t node = 0u;
   if (!can_id_unpack(can_id, NULL, &node))
     return false;
   return (node == (can_node_id_t)CAN_ID_NODE_ID_BROADCAST);
