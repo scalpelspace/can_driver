@@ -39,6 +39,23 @@ typedef uint8_t can_message_id_t; // Range: 0..63.
 typedef uint8_t can_node_id_t;    // Range: 0..31.
 typedef uint16_t can_id_t;        // Range: 0..0x7FF.
 
+typedef enum {
+  CAN_MSG_SYNC = 0, // System sync.
+
+  // 1..55 free for node specific message IDs.
+
+  CAN_MSG_ENUM_DISCOVER = 56, // Allocator requests UID hashes from all nodes.
+  // CAN ID: [CAN_MSG_ENUM_DISCOVER][CAN_ID_NODE_ID_BROADCAST].
+  CAN_MSG_ENUM_ADVERTISE = 57, // Nodes report their own UID hash.
+  // CAN ID: [CAN_MSG_ENUM_ADVERTISE][CAN_ID_NODE_ID_UNASSIGNED].
+  CAN_MSG_ENUM_ASSIGN = 58, // Allocator assigns each UID a Node ID.
+  // CAN ID: [CAN_MSG_ENUM_ASSIGN][CAN_ID_NODE_ID_BROADCAST].
+  CAN_MSG_ENUM_ACK = 59, // Nodes respond with acknowledgement.
+  // CAN ID: [CAN_MSG_ENUM_ACK][node_id=<assigned>].
+
+  // 60..63 reserved for future.
+} can_message_id_enum_t;
+
 /** Public functions. *********************************************************/
 
 /**
