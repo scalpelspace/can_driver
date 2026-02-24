@@ -37,7 +37,7 @@ enum {
   NODE_MAX = (1u << NODE_BITS) - 1u,             // 31.
   MESSAGE_ID_MAX = (1u << MESSAGE_ID_BITS) - 1u, // 63.
 
-  STD_MAX = 0x7FFU
+  STD_MAX = 0x7FFu
 };
 
 /** Private functions. ********************************************************/
