@@ -46,12 +46,16 @@ typedef enum {
 
   CAN_MSG_ENUM_DISCOVER = 56, // Allocator requests UID hashes from all nodes.
   // CAN ID: [CAN_MSG_ENUM_DISCOVER][CAN_ID_NODE_ID_BROADCAST].
+  //         0b011100011111, 0x71F, 1823.
   CAN_MSG_ENUM_ADVERTISE = 57, // Nodes report their own UID hash.
   // CAN ID: [CAN_MSG_ENUM_ADVERTISE][CAN_ID_NODE_ID_UNASSIGNED].
+  //         0b011100100000, 0x720, 1824.
   CAN_MSG_ENUM_ASSIGN = 58, // Allocator assigns each UID a Node ID.
   // CAN ID: [CAN_MSG_ENUM_ASSIGN][CAN_ID_NODE_ID_BROADCAST].
+  //         0b011101011111, 0x75F, 1887.
   CAN_MSG_ENUM_ACK = 59, // Nodes respond with acknowledgement.
   // CAN ID: [CAN_MSG_ENUM_ACK][node_id=<assigned>].
+  //         0b111011xxxxx, 0x760..0x77F, 1888..1919.
 
   // 60..63 reserved for future.
 } can_message_id_enum_t;
