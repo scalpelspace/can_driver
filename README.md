@@ -12,6 +12,7 @@ Low level simplified CAN bus (classic) communication drivers.
 <!-- TOC -->
 * [can_driver](#can_driver)
   * [1 CAN Bus Drivers](#1-can-bus-drivers)
+    * [1.1 CAN Message Signalize Size Limit](#11-can-message-signalize-size-limit)
   * [2 CAN ID ScalpelSpace Node Scheme](#2-can-id-scalpelspace-node-scheme)
 <!-- TOC -->
 
@@ -37,6 +38,13 @@ The CAN driver is intended to integrate with a `C` based DBC structure.
 
     - These generated files declare the message and signals in the appropriate
       type structs.
+
+### 1.1 CAN Message Signalize Size Limit
+
+To support lower-performance, commonly used MCUs, the signal packing/unpacking
+API limits individual signal values to `uint32_t`.
+
+Signals larger than 32 bits must be represented as multiple <= 32-bit signals.
 
 ---
 
