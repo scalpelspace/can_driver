@@ -30,6 +30,8 @@ extern "C" {
 
 /** Definitions. **************************************************************/
 
+#define CAN_ID_MAX_NODES (30u)
+
 // Reserved Node IDs.
 #define CAN_ID_NODE_ID_UNASSIGNED (0u)
 #define CAN_ID_NODE_ID_BROADCAST (31u)
@@ -60,17 +62,6 @@ typedef enum {
 
   // 60..63 reserved for future.
 } can_message_id_enum_t;
-
-/** Public variables. *********************************************************/
-
-// CAN ID allocation discovery message.
-const can_message_t message_discover;
-// CAN ID allocation advertise message.
-const can_message_t message_advertise;
-// CAN ID allocation assignment message.
-const can_message_t message_assign;
-// CAN ID allocation ack message.
-const can_message_t can_id_ack_dbc[32];
 
 /** Public functions. *********************************************************/
 
