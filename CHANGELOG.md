@@ -15,7 +15,7 @@
 
 ---
 
-## [v0.1.0 (2025-01-13)](https://github.com/scalpelspace/can_driver/releases/tag/v0.1.0)
+## [v0.1.0 (2026-01-13)](https://github.com/scalpelspace/can_driver/releases/tag/v0.1.0)
 
 - Initial release.
 
