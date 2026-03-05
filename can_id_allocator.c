@@ -44,10 +44,10 @@ static uint16_t discovered_uids_1[CAN_ID_MAX_NODES] = {0};
 // Discovered UID hash48s (32..47).
 static uint16_t discovered_uids_2[CAN_ID_MAX_NODES] = {0};
 // Assigning Node ID value (awaiting ACK).
-static uint8_t assigning_node_ids[CAN_ID_MAX_NODES] = {0};
+static can_node_id_t assigning_node_ids[CAN_ID_MAX_NODES] = {0};
 
 // Assigned (ACKed) Node IDs, indexed by Node ID.
-static uint8_t assigned_node_ids[CAN_ID_MAX_NODES] = {0};
+static can_node_id_t assigned_node_ids[CAN_ID_MAX_NODES] = {0};
 
 /** Private functions. ********************************************************/
 
@@ -237,6 +237,12 @@ void can_id_allocator_state_machine(void) {
 
     // Transition state if once all previously assigned nodes ACK.
     if (soft_assigned_nodes == assignment_acked_nodes) {
+
+      // Call assignment complete callback.
+      config.allocator_assigned_func(&assigned_node_ids[CAN_ID_MAX_NODES],
+                                     assignment_acked_nodes);
+
+      // State transition.
       allocator_state = ALLOCATOR_IDLE;
     }
     break;

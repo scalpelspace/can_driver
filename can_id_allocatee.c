@@ -163,6 +163,9 @@ void can_id_allocatee_state_machine(void) {
     pack_signal_raw32(&msg.signals[5], tx_data, 0u);
     config.can_tx_func(&msg, tx_data);
 
+    // Call assignment complete callback.
+    config.allocatee_assigned_func(node_id);
+
     // State transition.
     allocatee_state = ALLOCATEE_IDLE;
     break;

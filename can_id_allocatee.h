@@ -10,6 +10,7 @@
 /** Includes. *****************************************************************/
 
 #include "can_driver.h"
+#include "can_id.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -17,6 +18,13 @@
 
 /**
  * @brief Define function pointer type for sending CAN bus messages.
+ *
+ * @param msg
+ * @param data
+ *
+ * @return Success status.
+ * @retval true -> Transmit successful.
+ * @retval false -> Transmit unsuccessful.
  */
 typedef bool (*can_tx_func_t)(const can_message_t *msg, const uint8_t data[8]);
 
@@ -30,9 +38,18 @@ typedef bool (*can_tx_func_t)(const can_message_t *msg, const uint8_t data[8]);
 typedef void (*get_uid_hash48_func_t)(uint16_t *uid0, uint16_t *uid1,
                                       uint16_t *uid2);
 
+/**
+ * @brief Define function pointer type for post allocatee node ID assignment.
+ *
+ * @param node_id Assigned node ID.
+ */
+typedef void (*allocatee_assigned_func_t)(can_node_id_t node_id);
+
 typedef struct allocatee_config {
   can_tx_func_t can_tx_func; // CAN message transmit function pointer.
   get_uid_hash48_func_t get_uid_hash48_func; // Get UID hash48 function pointer.
+  allocatee_assigned_func_t
+      allocatee_assigned_func; // Allocatee success callback.
 } allocatee_config_t;
 
 /** Public functions. *********************************************************/

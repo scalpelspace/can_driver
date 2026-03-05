@@ -16,8 +16,19 @@
 
 /** Public types. *************************************************************/
 
+/**
+ * @brief Define function pointer type for post allocatee node ID assignment.
+ *
+ * @param node_ids
+ * @param node_count
+ */
+typedef void (*allocator_assigned_func_t)(
+    can_node_id_t node_ids[CAN_ID_MAX_NODES], can_node_id_t node_count);
+
 typedef struct allocator_config {
   can_tx_func_t can_tx_func; // CAN message transmit function pointer.
+  allocator_assigned_func_t
+      allocator_assigned_func; // Allocation success callback.
 } allocator_config_t;
 
 /** Public functions. *********************************************************/
