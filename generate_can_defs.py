@@ -7,16 +7,19 @@ Follows clang-format style with 2-space indents.
 
 Usage:
     ```shell
-    python3 generate_can_defs.py path/to/your.dbc path/to/output  # Unix.
+    # Unix.
+    python3 generate_can_defs.py path/to/your.dbc path/to/output
     ```
 
     ```shell
-    py generate_can_defs.py path/to/your.dbc path/to/output  # WindowsOS.
+    # WindowsOS.
+    py generate_can_defs.py path/to/your.dbc path/to/output
     ```
 
 Example:
     ```shell
-    python3 generate_can_defs.py example.dbc example_can_dbc  # Unix.
+    # Unix.
+    python3 generate_can_defs.py example.dbc example_can_dbc
     ```
     Creates "example_can_dbc.c" and "example_can_dbc.h" in the current directory
     based on example.dbc.
@@ -71,7 +74,11 @@ def parse_dbc(filename: str):
                         "signals": [],
                     }
                 else:
-                    print("Failed to parse BO_ line:", line, file=sys.stderr)
+                    print(
+                        "[ERROR] Failed to parse BO_ line:",
+                        line,
+                        file=sys.stderr,
+                    )
             elif line.lstrip().startswith("SG_"):
                 if current_msg is None:
                     # Signal without a message; skip it.
@@ -115,7 +122,11 @@ def parse_dbc(filename: str):
                     }
                     current_msg["signals"].append(signal)
                 else:
-                    print("Failed to parse SG_ line:", line, file=sys.stderr)
+                    print(
+                        "[ERROR] Failed to parse SG_ line:",
+                        line,
+                        file=sys.stderr,
+                    )
         # Append the final message, if any.
         if current_msg is not None:
             messages.append(current_msg)
@@ -256,7 +267,7 @@ def main():
     # Parse DBC.
     messages = parse_dbc(args.dbc_file)
     if not messages:  # Handle error.
-        print("No messages found in the DBC file.", file=sys.stderr)
+        print("[ERROR] No messages found in the DBC file.", file=sys.stderr)
         sys.exit(1)
 
     # Generate header and source file.
@@ -264,7 +275,10 @@ def main():
     generate_source(messages, args.output_file)
 
     # Output message.
-    print(f'Files generated: "{args.output_file}.h", "{args.output_file}.c".')
+    print(
+        f"[OKAY] Files generated: "
+        f'"{args.output_file}.h", "{args.output_file}.c".'
+    )
 
 
 if __name__ == "__main__":
