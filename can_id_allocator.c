@@ -239,7 +239,10 @@ void can_id_allocator_state_machine(void) {
     if (soft_assigned_nodes == assignment_acked_nodes) {
 
       // Call assignment complete callback.
-      config.allocator_assigned_func(&assigned_node_ids[CAN_ID_MAX_NODES],
+      config.allocator_assigned_func(&discovered_uids_0[CAN_ID_MAX_NODES],
+                                     &discovered_uids_1[CAN_ID_MAX_NODES],
+                                     &discovered_uids_2[CAN_ID_MAX_NODES],
+                                     &assigned_node_ids[CAN_ID_MAX_NODES],
                                      assignment_acked_nodes);
 
       // State transition.

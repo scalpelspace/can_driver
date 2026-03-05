@@ -19,11 +19,16 @@
 /**
  * @brief Define function pointer type for post allocatee node ID assignment.
  *
+ * @param uids_0
+ * @param uids_1
+ * @param uids_2
  * @param node_ids
  * @param node_count
  */
 typedef void (*allocator_assigned_func_t)(
-    can_node_id_t node_ids[CAN_ID_MAX_NODES], can_node_id_t node_count);
+    uint16_t uids_0[CAN_ID_MAX_NODES], uint16_t uids_1[CAN_ID_MAX_NODES],
+    uint16_t uids_2[CAN_ID_MAX_NODES], can_node_id_t node_ids[CAN_ID_MAX_NODES],
+    can_node_id_t node_count);
 
 typedef struct allocator_config {
   can_tx_func_t can_tx_func; // CAN message transmit function pointer.
