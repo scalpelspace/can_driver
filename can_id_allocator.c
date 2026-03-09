@@ -51,19 +51,22 @@ static can_node_id_t assigned_node_ids[CAN_ID_MAX_NODES] = {0};
 
 /** Private functions. ********************************************************/
 
-// Search for matching UIDs (Allocator ACK verification).
+/**
+ * @brief Search for matching UIDs (allocator ACK verification).
+ *
+ * @param uid_0 UID hash48 (0..15) to check for match.
+ * @param uid_1 UID hash48 (16..31) to check for match.
+ * @param uid_2 UID hash48 (32..47) to check for match.
+ */
 int16_t search_received_uids(const uint16_t uid_0, const uint16_t uid_1,
                              const uint16_t uid_2) {
   for (uint8_t i = 0; i < CAN_ID_MAX_NODES; i++) {
-    if (discovered_uids_0[i] == uid_0) {
-      // If first segment matches, verify the others.
-      if ((discovered_uids_1[i] == uid_1) && (discovered_uids_2[i] == uid_2)) {
-        return i; // Full 48-bit match.
-      }
-      return -1; // Partial mismatch at same index.
+    if ((discovered_uids_0[i] == uid_0) && (discovered_uids_1[i] == uid_1) &&
+        (discovered_uids_2[i] == uid_2)) {
+      return i;
     }
   }
-  return -1; // Not found.
+  return -1;
 }
 
 // TODO: Implement Node ID assignment strategy, maybe set in allocator_config_t?
