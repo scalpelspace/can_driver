@@ -7,8 +7,8 @@
 
 <!-- TOC -->
 * [Changelog](#changelog)
-  * [v0.1.0 (2025-01-13)](#v010--2025-01-13-)
-  * [v0.2.0 (TBD)](#v020--tbd-)
+  * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
+  * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
 <!-- TOC -->
 
 </details>
@@ -21,10 +21,17 @@
 
 ---
 
-## [v0.2.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.2.0)
+## [v0.2.0 (2026-03-08)](https://github.com/scalpelspace/can_driver/releases/tag/v0.2.0)
 
-- Transition to node-addressed CAN ID scheme.
+- Implement application-layer node-addressed CAN ID protocol.
     - Add [`can_id.c`](can_id.c) and [`can_id.h`](can_id.h).
+    - Implement CAN ID allocation (allocator and allocatee) logic.
+        - Add [`can_id_allocatee.c`](can_id_allocatee.c) and [
+          `can_id_allocatee.h`](can_id_allocatee.h).
+        - Add [`can_id_allocation_dbc.c`](can_id_allocation_dbc.c) and [
+          `can_id_allocation_dbc.h`](can_id_allocation_dbc.h).
+        - Add [`can_id_allocator.c`](can_id_allocator.c) and [
+          `can_id_allocator.h`](can_id_allocator.h).
 - Add merged DBC python script [
   `generate_merged_dbc.py`](generate_merged_dbc.py).
 - Improve QOL print messages in [`generate_can_defs.py`](generate_can_defs.py).
