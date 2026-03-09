@@ -55,33 +55,25 @@ typedef struct allocatee_config {
 /** Public functions. *********************************************************/
 
 /**
- * @breif CAN RX callback function for allocatee discovery message processing.
+ * @brief CAN RX callback function for allocatee discovery message processing.
  *
  * @param header
  * @param data
- *
- * @return Success status.
- * @retval true -> Discovery message processed successfully.
- * @retval false -> Error.
  */
 void can_rx_can_id_allocatee_discovery(const can_header_t *header,
                                        const uint8_t *data);
 
 /**
- * @breif CAN RX callback function for allocatee assignment message processing.
+ * @brief CAN RX callback function for allocatee assignment message processing.
  *
  * @param header
  * @param data
- *
- * @return Success status.
- * @retval true -> Allocatee message processed successfully.
- * @retval false -> Error.
  */
 void can_rx_can_id_allocatee_assignment(const can_header_t *header,
                                         const uint8_t *data);
 
 /**
- * @breif Begin CAN ID allocate state machine.
+ * @brief Begin CAN ID allocate state machine.
  *
  * @param allocatee
  *
@@ -92,7 +84,7 @@ void can_rx_can_id_allocatee_assignment(const can_header_t *header,
 bool can_id_allocatee_start(allocatee_config_t allocatee);
 
 /**
- * @breif Run CAN ID allocatee state machine.
+ * @brief Run CAN ID allocatee state machine.
  */
 void can_id_allocatee_state_machine(void);
 

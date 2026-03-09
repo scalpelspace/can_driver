@@ -39,7 +39,7 @@ typedef struct allocator_config {
 /** Public functions. *********************************************************/
 
 /**
- * @breif CAN RX callback function for allocator advertise message processing.
+ * @brief CAN RX callback function for allocator advertise message processing.
  *
  * @param header
  * @param data
@@ -48,7 +48,7 @@ void can_rx_can_id_allocatee_advertise(const can_header_t *header,
                                        const uint8_t *data);
 
 /**
- * @breif CAN RX callback function for allocator ack message processing.
+ * @brief CAN RX callback function for allocator ack message processing.
  *
  * @param header
  * @param data
@@ -57,7 +57,7 @@ void can_rx_can_id_allocator_ack(const can_header_t *header,
                                  const uint8_t *data);
 
 /**
- * @breif Begin CAN ID allocator state machine.
+ * @brief Begin CAN ID allocator state machine.
  *
  * @param allocator
  *
@@ -68,7 +68,7 @@ void can_rx_can_id_allocator_ack(const can_header_t *header,
 bool can_id_allocator_start(allocator_config_t allocator);
 
 /**
- * @breif Manually end CAN ID allocator discovery state.
+ * @brief Manually end CAN ID allocator discovery state.
  *
  * @return Success status.
  * @retval true -> Allocator ended discovery successfully.
@@ -77,7 +77,7 @@ bool can_id_allocator_start(allocator_config_t allocator);
 bool can_id_allocator_end_discovery(void);
 
 /**
- * @breif Run CAN ID allocator state machine.
+ * @brief Run CAN ID allocator state machine.
  */
 void can_id_allocator_state_machine(void);
 
