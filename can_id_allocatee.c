@@ -48,7 +48,8 @@ bool can_id_allocatee_start(const allocatee_config_t allocatee) {
 
 void can_rx_can_id_allocatee_discovery(const can_header_t *header,
                                        const uint8_t *data) {
-  const can_message_t msg = message_discover;
+  const can_message_t msg =
+      allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_DISCOVER];
 
   if (!header || !data)
     return;
@@ -68,7 +69,8 @@ void can_rx_can_id_allocatee_discovery(const can_header_t *header,
 
 void can_rx_can_id_allocatee_assignment(const can_header_t *header,
                                         const uint8_t *data) {
-  const can_message_t msg = message_assign;
+  const can_message_t msg =
+      allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ASSIGN];
 
   if (!header || !data)
     return;
@@ -128,7 +130,7 @@ void can_id_allocatee_state_machine(void) {
     config.get_uid_hash48_func(&uid_0, &uid_1, &uid_2);
 
     // Pack signals and send.
-    msg = message_advertise;
+    msg = allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ADVERTISE];
     pack_signal_raw32(&msg.signals[0], tx_data, uid_0);
     pack_signal_raw32(&msg.signals[1], tx_data, uid_1);
     pack_signal_raw32(&msg.signals[2], tx_data, uid_2);
@@ -154,7 +156,7 @@ void can_id_allocatee_state_machine(void) {
     config.get_uid_hash48_func(&uid_0, &uid_1, &uid_2);
 
     // Pack signals and send.
-    msg = can_id_ack_dbc[node_id];
+    msg = allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ACK_00 + node_id];
     pack_signal_raw32(&msg.signals[0], tx_data, uid_0);
     pack_signal_raw32(&msg.signals[1], tx_data, uid_1);
     pack_signal_raw32(&msg.signals[2], tx_data, uid_2);

@@ -45,3 +45,10 @@
   index enum type generation with consolidated `..._IDX_COUNT` value.
     - Remove old `dbc_message_count` implementation, backwards compatibility
       loss.
+- Update [`can_id_scalpelspace.dbc`](can_id_scalpelspace.dbc) for specific
+  transmitter and receiver nodes.
+- Swap local code DBCs ([`can_id_allocation_dbc.c`](can_id_allocation_dbc.c)
+  and [`can_id_allocation_dbc.h`](can_id_allocation_dbc.h)) to near full
+  auto-generated versions.
+    - Allocation DBC messages renamed to use the short form "ACK".
+    - Previously used a custom structure, updated to use index enum design.

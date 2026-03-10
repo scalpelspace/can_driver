@@ -79,8 +79,18 @@ Drivers are implemented in the following files:
 1. [can_id.c](can_id.c)
 2. [can_id.h](can_id.h)
 
-- To create a merged DBC file from multiple sources (git repos)
-  [generate_merged_dbc.py](generate_merged_dbc.py) is used.
+Local code DBCs are implemented in the following files
+(using [generate_can_defs.py](generate_can_defs.py)):
+
+1. [can_id_allocation_dbc.h](can_id_allocation_dbc.h)
+2. [can_id_allocation_dbc.c](can_id_allocation_dbc.c)
+
+> **Note:** After generation, `dbc_messages` and `dbc_message_count` are
+> manually named `allocation_dbc` and `allocation_dbc_count` to avoid symbol
+> conflicts with per-device DBC files in the same build.
+
+To create a merged DBC file from multiple sources (git repos)
+[generate_merged_dbc.py](generate_merged_dbc.py) is used.
 
 ### 2.1 Node ID Allocation Protocol
 

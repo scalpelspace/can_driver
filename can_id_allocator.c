@@ -107,7 +107,8 @@ bool can_id_allocator_end_discovery(void) {
 
 void can_rx_can_id_allocatee_advertise(const can_header_t *header,
                                        const uint8_t *data) {
-  const can_message_t msg = message_advertise;
+  const can_message_t msg =
+      allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ADVERTISE];
 
   if (!header || !data)
     return;
@@ -143,7 +144,8 @@ void can_rx_can_id_allocatee_advertise(const can_header_t *header,
 
 void can_rx_can_id_allocator_ack(const can_header_t *header,
                                  const uint8_t *data) {
-  const can_message_t msg = can_id_ack_dbc[0]; // Reference only message.
+  const can_message_t msg = allocation_dbc
+      [CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ACK_00]; // Reference only message.
 
   if (!header || !data)
     return;
@@ -193,7 +195,7 @@ void can_id_allocator_state_machine(void) {
     session_id += 1;
 
     // Pack signals and send.
-    msg = message_discover;
+    msg = allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_DISCOVER];
     pack_signal_raw32(&msg.signals[0], tx_data, session_id);
     config.can_tx_func(&msg, tx_data);
 
@@ -218,7 +220,7 @@ void can_id_allocator_state_machine(void) {
     // Transmit the assignment with each related UID.
     for (uint8_t i = 0; i < discovered_nodes; i++) {
       // Pack signals and send.
-      msg = message_assign;
+      msg = allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ASSIGN];
       pack_signal_raw32(&msg.signals[0], tx_data, discovered_uids_0[i]);
       pack_signal_raw32(&msg.signals[1], tx_data, discovered_uids_1[i]);
       pack_signal_raw32(&msg.signals[2], tx_data, discovered_uids_2[i]);
