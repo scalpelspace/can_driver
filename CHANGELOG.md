@@ -9,7 +9,7 @@
 * [Changelog](#changelog)
   * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
   * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
-  * [v0.3.0 (TBD)](#v030--tbd-)
+  * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
 <!-- TOC -->
 
 </details>
@@ -39,7 +39,7 @@
 
 ---
 
-## [v0.3.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.2.1)
+## [v0.3.0 (2026-03-10)](https://github.com/scalpelspace/can_driver/releases/tag/v0.2.1)
 
 - Update [`generate_can_defs.py`](generate_can_defs.py) for per CAN message
   index enum type generation with consolidated `..._IDX_COUNT` value.
