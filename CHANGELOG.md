@@ -9,6 +9,7 @@
 * [Changelog](#changelog)
   * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
   * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
+  * [v0.3.0 (TBD)](#v030--tbd-)
 <!-- TOC -->
 
 </details>
@@ -35,3 +36,12 @@
 - Add merged DBC python script [
   `generate_merged_dbc.py`](generate_merged_dbc.py).
 - Improve QOL print messages in [`generate_can_defs.py`](generate_can_defs.py).
+
+---
+
+## [v0.3.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.2.1)
+
+- Update [`generate_can_defs.py`](generate_can_defs.py) for per CAN message
+  index enum type generation with consolidated `..._IDX_COUNT` value.
+    - Remove old `dbc_message_count` implementation, backwards compatibility
+      loss.

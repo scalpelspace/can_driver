@@ -171,39 +171,57 @@ def generate_source(messages, output_filename: str):
             )
             out.write(f"        .signal_count = {len(msg['signals'])},\n")
             out.write("        .signals =\n            {\n")
-            for sig in msg["signals"]:
-                out.write("                {\n")
-                out.write(f"                    .name = \"{sig['name']}\",\n")
-                out.write(
-                    f"                    .start_bit = {sig['start_bit']},\n"
-                )
-                out.write(
-                    f"                    .bit_length = {sig['bit_length']},\n"
-                )
-                out.write(
-                    f"                    .byte_order = {sig['byte_order']},\n"
-                )
-                out.write(
-                    f"                    .is_signed = {str(sig['is_signed']).lower()},\n"
-                )
-                out.write(f"                    .scale = {sig['scale']}f,\n")
-                out.write(f"                    .offset = {sig['offset']}f,\n")
-                out.write(
-                    f"                    .min_value = {sig['min_value']}f,\n"
-                )
-                out.write(
-                    f"                    .max_value = {sig['max_value']}f,\n"
-                )
-                out.write("                },\n")
-            out.write("            },\n")
+            if len(msg["signals"]) == 0:
+                out.write("\n            },\n")
+            else:
+                for sig in msg["signals"]:
+                    out.write("                {\n")
+                    out.write(
+                        f"                    .name = \"{sig['name']}\",\n"
+                    )
+                    out.write(
+                        f"                    .start_bit = {sig['start_bit']},\n"
+                    )
+                    out.write(
+                        f"                    .bit_length = {sig['bit_length']},\n"
+                    )
+                    out.write(
+                        f"                    .byte_order = {sig['byte_order']},\n"
+                    )
+                    out.write(
+                        f"                    .is_signed = {str(sig['is_signed']).lower()},\n"
+                    )
+                    out.write(
+                        f"                    .scale = {sig['scale']}f,\n"
+                    )
+                    out.write(
+                        f"                    .offset = {sig['offset']}f,\n"
+                    )
+                    out.write(
+                        f"                    .min_value = {sig['min_value']}f,\n"
+                    )
+                    out.write(
+                        f"                    .max_value = {sig['max_value']}f,\n"
+                    )
+                    out.write("                },\n")
+                out.write("            },\n")
             out.write("    },\n")
-        out.write("};\n\n")
-        out.write(
-            "const int dbc_message_count = sizeof(dbc_messages) / sizeof(dbc_messages[0]);\n"
-        )
+        out.write("};\n")
 
 
-def generate_header(output_filename: str):
+def generate_dbc_index_enum(messages, output_filename: str) -> str:
+    """Generate a typedef enum for DBC message array indices."""
+    prefix = output_filename.upper()
+    lines = [f"typedef enum {{\n"]
+    for i, msg in enumerate(messages):
+        enum_name = f"{prefix}_IDX_{msg['name'].upper()}"
+        lines.append(f"  {enum_name} = {i},\n")
+    lines.append(f"\n  {prefix}_IDX_COUNT // Total message count.\n")
+    lines.append(f"}} {output_filename.lower()}_index_t;\n")
+    return "".join(lines)
+
+
+def generate_header(messages, output_filename: str):
     """Generate header file with appropriate extern definitions."""
     with open(f"{output_filename}.h", "w") as out:
         out.write(
@@ -234,10 +252,15 @@ def generate_header(output_filename: str):
         out.write("#endif\n\n")
 
         out.write(
+            "/** DBC message index enum. **************************************************/\n\n"
+        )
+        out.write(generate_dbc_index_enum(messages, output_filename))
+        out.write("\n")
+
+        out.write(
             "/** Public variables. *********************************************************/\n\n"
         )
-        out.write("extern const can_message_t dbc_messages[];\n")
-        out.write("extern const int dbc_message_count;\n\n")
+        out.write("extern const can_message_t dbc_messages[];\n\n")
 
         out.write(
             "/** CPP guard close. **********************************************************/\n\n"
@@ -271,7 +294,7 @@ def main():
         sys.exit(1)
 
     # Generate header and source file.
-    generate_header(args.output_file)
+    generate_header(messages, args.output_file)
     generate_source(messages, args.output_file)
 
     # Output message.
