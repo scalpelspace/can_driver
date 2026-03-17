@@ -85,9 +85,13 @@ Local code DBCs are implemented in the following files
 1. [can_id_allocation_dbc.h](can_id_allocation_dbc.h)
 2. [can_id_allocation_dbc.c](can_id_allocation_dbc.c)
 
-> **Note:** After generation, `dbc_messages` and `dbc_message_count` are
-> manually named `allocation_dbc` and `allocation_dbc_count` to avoid symbol
-> conflicts with per-device DBC files in the same build.
+> **Note:**
+> 1. After generation, `dbc_messages` and `dbc_message_count` are manually named
+     `allocation_dbc` and `allocation_dbc_count` to avoid symbol conflicts with
+     per-device DBC files in the same build.
+> 2. The source DBC retains the per-node ACK records as the true definition. The
+     generated code DBC uses a deliberate reduction, only maintaining the Node 0
+     ACK record.
 
 To create a merged DBC file from multiple sources (git repos)
 [generate_merged_dbc.py](generate_merged_dbc.py) is used.

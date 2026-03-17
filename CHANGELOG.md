@@ -10,7 +10,7 @@
   * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
   * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
   * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
-  * [v0.3.2 (TBD)](#v032--tbd-)
+  * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
 <!-- TOC -->
 
 </details>
@@ -61,7 +61,7 @@
 
 ---
 
-## [v0.3.2 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.2)
+## [v0.3.2 (2026-03-16)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.2)
 
 - Fix [`CHANGELOG.md`](CHANGELOG.md) for bad hyperlink on release `v0.3.0`.
 - Reduce allocation DBC memory usage by removing per-node ACK message records.
@@ -71,6 +71,7 @@
     - The source DBC retains the full per-node ACK records as the true
       definition. The generated code is a deliberate reduction from the
       true DBC.
+    - Update documentation accordingly.
 - Implement CAN Message ID and Node ID validation in
   [`can_id_allocator.c`](can_id_allocator.c) `can_rx_can_id_allocator_ack()`.
 - Fix `can_rx_can_id_allocatee_advertise` renamed to
