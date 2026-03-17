@@ -152,6 +152,21 @@ void can_rx_can_id_allocator_ack(const can_header_t *header,
   if (allocator_state != ALLOCATOR_AWAIT_ACK)
     return;
 
+  // Validate message_id and node_id from CAN ID.
+  can_message_id_t rx_msg_id = 0;
+  can_node_id_t rx_node_id_in_can_id = 0;
+  if (!can_id_unpack(header->standard_id, &rx_msg_id, &rx_node_id_in_can_id))
+    return;
+  if (rx_msg_id != (can_message_id_t)CAN_MSG_ENUM_ACK)
+    return;
+  if (rx_node_id_in_can_id == CAN_ID_NODE_ID_UNASSIGNED ||
+      rx_node_id_in_can_id == CAN_ID_NODE_ID_BROADCAST)
+    return;
+
+  // DLC must match.
+  if (header->dlc != msg.dlc)
+    return;
+
   // Decode fields (using ACK message[0] signals as reference for decoding).
   const uint16_t rx_uid_0 = (uint16_t)decode_signal(&msg.signals[0], data);
   const uint16_t rx_uid_1 = (uint16_t)decode_signal(&msg.signals[1], data);
@@ -164,10 +179,7 @@ void can_rx_can_id_allocator_ack(const can_header_t *header,
   if (session_id != rx_session_id)
     return;
 
-  // Extract node id from CAN ID (must match the Node ID in data).
-  can_node_id_t rx_node_id_in_can_id = 0;
-  if (!can_id_unpack(header->standard_id, NULL, &rx_node_id_in_can_id))
-    return;
+  // Node ID in data must match node ID in CAN ID.
   if (rx_node_id_in_data != rx_node_id_in_can_id)
     return;
 

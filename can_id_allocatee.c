@@ -155,8 +155,14 @@ void can_id_allocatee_state_machine(void) {
     // Calculate UID.
     config.get_uid_hash48_func(&uid_0, &uid_1, &uid_2);
 
+    // ACK CAN ID encodes the assigned node_id.
+    can_id_t ack_id;
+    can_id_pack(CAN_MSG_ENUM_ACK, node_id, &ack_id);
+
     // Pack signals and send.
-    msg = allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ACK_00 + node_id];
+    // Use ACK_00 as a signal-definition template, patch the new message ID.
+    msg = allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ACK_00];
+    msg.message_id = (uint32_t)ack_id;
     pack_signal_raw32(&msg.signals[0], tx_data, uid_0);
     pack_signal_raw32(&msg.signals[1], tx_data, uid_1);
     pack_signal_raw32(&msg.signals[2], tx_data, uid_2);

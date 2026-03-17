@@ -10,6 +10,7 @@
   * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
   * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
   * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
+  * [v0.3.2 (TBD)](#v032--tbd-)
 <!-- TOC -->
 
 </details>
@@ -54,5 +55,21 @@
     - Previously used a custom structure, updated to use index enum design.
 
 > **Post Release Notes:**
-> - Error: This CHANGELOG record has the incorrect hyperlink. Incorrectly
-    directs to `v0.2.1`, should be `v0.3.0`.
+> - The `v0.3.0` entry in [`CHANGELOG.md`](CHANGELOG.md) uses the
+    incorrect hyperlink. Incorrectly linked to `v0.2.1`, but should be to
+    `v0.3.0`.
+
+---
+
+## [v0.3.2 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.2)
+
+- Fix [`CHANGELOG.md`](CHANGELOG.md) for bad hyperlink on release `v0.3.0`.
+- Reduce allocation DBC memory usage by removing per-node ACK message records.
+    - Previously each of the 30 assignable node IDs had a dedicated ACK DBC
+      entry. Now only a reference ACK entry (node ID 0) is generated in code.
+    - The node ID bits in the CAN ID are set at runtime via bit operations.
+    - The source DBC retains the full per-node ACK records as the true
+      definition. The generated code is a deliberate reduction from the
+      true DBC.
+- Implement CAN Message ID and Node ID validation in
+  [`can_id_allocator.c`](can_id_allocator.c) `can_rx_can_id_allocator_ack()`.
