@@ -39,7 +39,7 @@
 
 ---
 
-## [v0.3.0 (2026-03-10)](https://github.com/scalpelspace/can_driver/releases/tag/v0.2.1)
+## [v0.3.0 (2026-03-10)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.0)
 
 - Update [`generate_can_defs.py`](generate_can_defs.py) for per CAN message
   index enum type generation with consolidated `..._IDX_COUNT` value.
@@ -52,3 +52,7 @@
   auto-generated versions.
     - Allocation DBC messages renamed to use the short form "ACK".
     - Previously used a custom structure, updated to use index enum design.
+
+> **Post Release Notes:**
+> - Error: This CHANGELOG record has the incorrect hyperlink. Incorrectly
+    directs to `v0.2.1`, should be `v0.3.0`.
