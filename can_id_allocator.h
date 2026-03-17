@@ -44,7 +44,7 @@ typedef struct allocator_config {
  * @param header
  * @param data
  */
-void can_rx_can_id_allocatee_advertise(const can_header_t *header,
+void can_rx_can_id_allocator_advertise(const can_header_t *header,
                                        const uint8_t *data);
 
 /**

@@ -73,3 +73,5 @@
       true DBC.
 - Implement CAN Message ID and Node ID validation in
   [`can_id_allocator.c`](can_id_allocator.c) `can_rx_can_id_allocator_ack()`.
+- Fix `can_rx_can_id_allocatee_advertise` renamed to
+  `can_rx_can_id_allocator_advertise` to correctly reflect owning module.

@@ -105,7 +105,7 @@ bool can_id_allocator_end_discovery(void) {
   return false;
 }
 
-void can_rx_can_id_allocatee_advertise(const can_header_t *header,
+void can_rx_can_id_allocator_advertise(const can_header_t *header,
                                        const uint8_t *data) {
   const can_message_t msg =
       allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ADVERTISE];
