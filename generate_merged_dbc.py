@@ -3,13 +3,32 @@
 Clone multiple git repos (each containing one or more .dbc files at the root
 directory) and merge them into a single merged .dbc file.
 
+Each repo entry can optionally specify a branch and a node ID using the format:
+    url[@branch][#node_id]
+
+Node ID must be in the assignable range (1..30). If omitted, defaults to 0
+(unassigned), and CAN IDs are left as-is (base DBC state).
+
 Example:
     ```shell
     # Unix.
     python3 generate_merged_dbc.py --repos-file repos.txt --out project.dbc --workdir workspace
     ```
-    Creates a merged DBC named "project.dbc" using repo URLs in "repos.txt"
-    (one repo URL per line). DBC merge work done in "workspace" directory.
+
+    repos.txt example:
+    ```
+    https://github.com/your_org/repo_a.git
+    https://github.com/your_org/repo_b.git@main
+    https://github.com/your_org/repo_c.git@main#1
+    https://github.com/your_org/repo_d.git@main#2
+    https://github.com/your_org/repo_d.git@main#3
+    ```
+
+    Creates a merged DBC named "project.dbc" with:
+      - repo_a messages (main) patched to node_id=0.
+      - repo_b messages (main) patched to node_id=0.
+      - repo_c messages (main) patched to node_id=1.
+      - repo_d messages (main) patched to node_id=2 and node_id=3 (2 instances).
 """
 
 from __future__ import annotations
@@ -25,11 +44,55 @@ from typing import Optional
 
 REPOS: list[str] = [
     # "https://github.com/your_org/repo1.git",
-    # "https://github.com/your_org/repo2.git@main"
+    # "https://github.com/your_org/repo2.git@main#2"
 ]
 
-MSG_START_RE = re.compile(r"^BO_\s+(\d+)\s+")
+# ScalpelSpace CAN ID scheme constants.
+NODE_ID_BITS = 5
+NODE_ID_MASK = (1 << NODE_ID_BITS) - 1  # 0x1F
+MESSAGE_ID_SHIFT = NODE_ID_BITS  # 5
+NODE_ID_UNASSIGNED = 0
+NODE_ID_BROADCAST = 31
+CAN_ID_MAX_ASSIGNABLE = 30  # 1..30 inclusive.
+
+MSG_START_RE = re.compile(r"^BO_\s+(\d+)\s+(\w+)\s*:\s*(\d+)\s+(\S+)")
 NODE_LINE_RE = re.compile(r"^BU_:\s*(.*)$")
+
+
+def patch_can_id(can_id: int, node_id: int) -> int:
+    """Repack a ScalpelSpace CAN ID with a new node_id.
+
+    Extracts the message_id from bits 10..5 and repacks with the given node_id
+    in bits 4..0.
+
+    Args:
+        can_id: Original 11-bit CAN ID (node_id assumed 0 in base DBC).
+        node_id: Assignable node ID (1..30).
+
+    Returns:
+        Patched 11-bit CAN ID.
+    """
+    message_id = (can_id >> MESSAGE_ID_SHIFT) & 0x3F  # Extract bits 10..5.
+    return (message_id << MESSAGE_ID_SHIFT) | (node_id & NODE_ID_MASK)
+
+
+def validate_node_id(node_id: int, spec: str) -> bool:
+    """Validate node_id is within the assignable range."""
+    if node_id == NODE_ID_UNASSIGNED:
+        return True  # 0 is valid (unassigned/base state).
+    if node_id == NODE_ID_BROADCAST:
+        print(
+            f"[ERROR] node_id=31 is reserved for broadcast: {spec}",
+            file=sys.stderr,
+        )
+        return False
+    if not (1 <= node_id <= CAN_ID_MAX_ASSIGNABLE):
+        print(
+            f"[ERROR] node_id={node_id} out of assignable range (1..30): {spec}",
+            file=sys.stderr,
+        )
+        return False
+    return True
 
 
 @dataclass
@@ -52,12 +115,39 @@ class DBCDoc:
     other_lines: OrderedSet = field(default_factory=OrderedSet)
 
 
-def _split_repo_branch(spec: str) -> tuple[str, Optional[str]]:
+@dataclass
+class RepoSpec:
+    url: str
+    branch: Optional[str]
+    node_id: int  # 0 = unassigned (base DBC, no patching).
+
+
+def _split_repo_spec(spec: str) -> RepoSpec:
+    """Parse a repo spec of the form url[@branch][#node_id]."""
+    node_id = NODE_ID_UNASSIGNED
+
+    # Extract node_id suffix (#N).
+    if "#" in spec:
+        spec, node_id_str = spec.rsplit("#", 1)
+        try:
+            node_id = int(node_id_str.strip())
+        except ValueError:
+            print(
+                f"[WARN] Invalid node_id '{node_id_str}' in spec '{spec}', "
+                f"defaulting to 0.",
+                file=sys.stderr,
+            )
+            node_id = NODE_ID_UNASSIGNED
+
+    # Extract branch suffix (@branch).
+    branch = None
     if "@" in spec:
         url, branch = spec.rsplit("@", 1)
         branch = branch.strip() or None
-        return url.strip(), branch
-    return spec.strip(), None
+    else:
+        url = spec
+
+    return RepoSpec(url=url.strip(), branch=branch, node_id=node_id)
 
 
 def run(cmd: list[str], cwd: Optional[Path] = None) -> None:
@@ -162,7 +252,8 @@ def parse_dbc(path: Path) -> DBCDoc:
             else:
                 if doc.messages[can_id] != block:
                     print(
-                        f"[WARN] {path.name}: conflicting BO_ {can_id}. Keeping first occurrence.",
+                        f"[WARN] {path.name}: conflicting BO_ {can_id}. "
+                        f"Keeping first occurrence.",
                         file=sys.stderr,
                     )
             continue
@@ -174,6 +265,69 @@ def parse_dbc(path: Path) -> DBCDoc:
         i += 1
 
     return doc
+
+
+def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
+    """Return a new DBCDoc with all CAN IDs patched for the given node_id.
+
+    Allocation protocol messages (message_id >= 56) are never patched -
+    these are managed by the allocation protocol itself.
+
+    Args:
+        doc: Parsed DBC document.
+        node_id: Node ID to apply (1..30). 0 = no patching.
+        repo_name: Used for naming disambiguation in multi-instance scenarios.
+
+    Returns:
+        New DBCDoc with patched CAN IDs and disambiguated message/signal names.
+    """
+    if node_id == NODE_ID_UNASSIGNED:
+        return doc  # No patching needed.
+
+    patched = DBCDoc()
+    patched.nodes = doc.nodes
+    patched.other_lines = doc.other_lines
+
+    for old_id in doc.message_order:
+        block = doc.messages[old_id]
+
+        # Extract message_id from the CAN ID (bits 10..5).
+        message_id = (old_id >> MESSAGE_ID_SHIFT) & 0x3F
+
+        # Skip allocation protocol messages (message_id 56..63).
+        # These are managed by the allocation protocol, not the node DBC.
+        if message_id >= 56:
+            new_id = old_id  # Leave unchanged.
+            patched.messages[new_id] = block
+            patched.message_order.append(new_id)
+            continue
+
+        new_id = patch_can_id(old_id, node_id)
+
+        # Patch the BO_ line: update CAN ID and append node suffix to name.
+        new_block = []
+        for line in block:
+            m = MSG_START_RE.match(line)
+            if m:
+                msg_name = m.group(2)
+                dlc = m.group(3)
+                transmitter = m.group(4)
+                # Append node suffix to disambiguate multi-instance messages.
+                new_name = f"{msg_name}_n{node_id:02d}"
+                line = f"BO_ {new_id} {new_name}: {dlc} {transmitter}"
+            new_block.append(line)
+
+        if new_id in patched.messages:
+            print(
+                f"[WARN] Patched CAN ID {new_id} collision for node_id="
+                f"{node_id} in {repo_name}. Keeping first occurrence.",
+                file=sys.stderr,
+            )
+        else:
+            patched.messages[new_id] = new_block
+            patched.message_order.append(new_id)
+
+    return patched
 
 
 def parse_base_header(path: Path) -> tuple[list[str], list[str]]:
@@ -203,7 +357,8 @@ def merge_docs(base_header: list[str], docs: list[DBCDoc]) -> DBCDoc:
             else:
                 if out.messages[can_id] != block:
                     print(
-                        f"[WARN] conflicting BO_ {can_id} across inputs. Keeping first occurrence.",
+                        f"[WARN] conflicting BO_ {can_id} across inputs. "
+                        f"Keeping first occurrence.",
                         file=sys.stderr,
                     )
 
@@ -268,14 +423,6 @@ def load_repos_from_file(path: Path) -> list[str]:
     return repos
 
 
-def pick_root_dbc(repo_dirs: list[Path]) -> Optional[Path]:
-    for rd in repo_dirs:
-        dbcs = find_dbc_files_root_only(rd)
-        if dbcs:
-            return dbcs[0]
-    return None
-
-
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -283,7 +430,7 @@ def main() -> int:
     )
     ap.add_argument(
         "--repos-file",
-        help="Text file: one repo URL per line (optionally url@branch)",
+        help="Text file: one repo URL per line (url[@branch][#node_id])",
     )
     ap.add_argument(
         "--out", default="merged.dbc", help="Output merged DBC path"
@@ -293,11 +440,11 @@ def main() -> int:
     workdir = Path(args.workdir).resolve()
     workdir.mkdir(parents=True, exist_ok=True)
 
-    repos = REPOS
+    raw_repos = REPOS
     if args.repos_file:
-        repos = load_repos_from_file(Path(args.repos_file).resolve())
+        raw_repos = load_repos_from_file(Path(args.repos_file).resolve())
 
-    if not repos:
+    if not raw_repos:
         print(
             "[ERROR] No repos provided. "
             "Edit REPOS in the script or pass --repos-file.",
@@ -305,25 +452,49 @@ def main() -> int:
         )
         return 2
 
+    # Parse and validate repo specs.
+    specs: list[RepoSpec] = []
+    for raw in raw_repos:
+        spec = _split_repo_spec(raw)
+        if not validate_node_id(spec.node_id, raw):
+            return 2
+        specs.append(spec)
+
+    # Warn on duplicate node_id assignments (excluding 0).
+    seen_node_ids: dict[int, str] = {}
+    for spec in specs:
+        if spec.node_id != NODE_ID_UNASSIGNED:
+            if spec.node_id in seen_node_ids:
+                print(
+                    f"[WARN] node_id={spec.node_id} assigned to multiple repos: "
+                    f"'{seen_node_ids[spec.node_id]}' and '{spec.url}'. "
+                    f"CAN ID collisions likely.",
+                    file=sys.stderr,
+                )
+            else:
+                seen_node_ids[spec.node_id] = spec.url
+
     # Clone/update repos.
-    repo_dirs: list[Path] = []
-    for idx, spec in enumerate(repos, start=1):
-        url, branch = _split_repo_branch(spec)
+    repo_dirs: list[tuple[Path, RepoSpec]] = []
+    for idx, spec in enumerate(specs, start=1):
         safe = re.sub(
             r"[^A-Za-z0-9._-]+",
             "_",
-            url.strip().split("/")[-1].replace(".git", ""),
+            spec.url.strip().split("/")[-1].replace(".git", ""),
         )
-        dst = workdir / f"{idx:02d}_{safe}"
+        # Include node_id in dir name to support multi-instance of same repo.
+        dst = workdir / f"{idx:02d}_{safe}_n{spec.node_id:02d}"
         print(
-            f"[INFO] Syncing {url}" + (f" (branch {branch})" if branch else "")
+            f"[INFO] Syncing {spec.url}"
+            + (f" (branch {spec.branch})" if spec.branch else "")
+            + f" -> node_id={spec.node_id}"
         )
-        git_clone_or_update(url, branch, dst)
-        repo_dirs.append(dst)
+        git_clone_or_update(spec.url, spec.branch, dst)
+        repo_dirs.append((dst, spec))
 
-    # Find root-level DBCs.
+    # Find and parse root-level DBCs, applying node ID patches.
     all_dbcs: list[Path] = []
-    for rd in repo_dirs:
+    for rd, _ in repo_dirs:
         all_dbcs.extend(find_dbc_files_root_only(rd))
 
     if not all_dbcs:
@@ -333,13 +504,23 @@ def main() -> int:
         return 2
 
     print(f"[INFO] Found {len(all_dbcs)} .dbc file(s)")
-    for p in all_dbcs:
-        print(f"  - {p}")
+
+    docs: list[DBCDoc] = []
+    for rd, spec in repo_dirs:
+        dbcs = find_dbc_files_root_only(rd)
+        for dbc_path in dbcs:
+            print(
+                f"  - {dbc_path}"
+                + (f" [node_id={spec.node_id}]" if spec.node_id else "")
+            )
+            parsed = parse_dbc(dbc_path)
+            repo_name = dbc_path.stem
+            patched = apply_node_id(parsed, spec.node_id, repo_name)
+            docs.append(patched)
 
     # Use first DBC as header template.
     base_header, _ = parse_base_header(all_dbcs[0])
 
-    docs: list[DBCDoc] = [parse_dbc(p) for p in all_dbcs]
     merged = merge_docs(base_header=base_header, docs=docs)
     out_text = render_merged(merged)
 
