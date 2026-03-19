@@ -55,6 +55,10 @@ NODE_ID_UNASSIGNED = 0
 NODE_ID_BROADCAST = 31
 CAN_ID_MAX_ASSIGNABLE = 30  # 1..30 inclusive.
 
+# Node names that represent shared roles rather than specific devices, these are
+# not suffixed.
+SHARED_NODE_ROLES = {"LISTENER", "REQUESTER", "COMMANDER"}
+
 MSG_START_RE = re.compile(r"^BO_\s+(\d+)\s+(\w+)\s*:\s*(\d+)\s+(\S+)")
 NODE_LINE_RE = re.compile(r"^BU_:\s*(.*)$")
 
@@ -273,20 +277,36 @@ def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
     Allocation protocol messages (message_id >= 56) are never patched -
     these are managed by the allocation protocol itself.
 
+    Node names in BU_ are suffixed with the node_id (e.g. NODE_NAME ->
+    NODE_NAME_02). Message names are always preserved as-is from the source DBC.
+    Transmitter fields on BO_ lines are updated to match the suffixed node name.
+
     Args:
         doc: Parsed DBC document.
         node_id: Node ID to apply (1..30). 0 = no patching.
-        repo_name: Used for naming disambiguation in multi-instance scenarios.
+        repo_name: Used for warning messages on collision.
 
     Returns:
-        New DBCDoc with patched CAN IDs and disambiguated message/signal names.
+        New DBCDoc with patched CAN IDs, suffixed node names, original message names.
     """
     if node_id == NODE_ID_UNASSIGNED:
         return doc  # No patching needed.
 
     patched = DBCDoc()
-    patched.nodes = doc.nodes
     patched.other_lines = doc.other_lines
+
+    # Build suffixed node name mapping: NODE_NAME -> NODE_NAME_02.
+    node_suffix = f"_{node_id:02d}"
+    patched.nodes = OrderedSet()
+    node_name_map: dict[str, str] = {}
+    for n in doc.nodes.items:
+        if n in SHARED_NODE_ROLES:
+            node_name_map[n] = n  # No suffix.
+            patched.nodes.add(n)
+        else:
+            suffixed = f"{n}{node_suffix}"
+            node_name_map[n] = suffixed
+            patched.nodes.add(suffixed)
 
     for old_id in doc.message_order:
         block = doc.messages[old_id]
@@ -297,14 +317,14 @@ def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
         # Skip allocation protocol messages (message_id 56..63).
         # These are managed by the allocation protocol, not the node DBC.
         if message_id >= 56:
-            new_id = old_id  # Leave unchanged.
-            patched.messages[new_id] = block
-            patched.message_order.append(new_id)
+            patched.messages[old_id] = block
+            patched.message_order.append(old_id)
             continue
 
         new_id = patch_can_id(old_id, node_id)
 
-        # Patch the BO_ line: update CAN ID and append node suffix to name.
+        # Patch BO_ line: update CAN ID and suffix the transmitter node name.
+        # Message name is preserved exactly as defined in the source DBC.
         new_block = []
         for line in block:
             m = MSG_START_RE.match(line)
@@ -312,9 +332,10 @@ def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
                 msg_name = m.group(2)
                 dlc = m.group(3)
                 transmitter = m.group(4)
-                # Append node suffix to disambiguate multi-instance messages.
-                new_name = f"{msg_name}_n{node_id:02d}"
-                line = f"BO_ {new_id} {new_name}: {dlc} {transmitter}"
+                suffixed_transmitter = node_name_map.get(
+                    transmitter, transmitter
+                )
+                line = f"BO_ {new_id} {msg_name}: {dlc} {suffixed_transmitter}"
             new_block.append(line)
 
         if new_id in patched.messages:
