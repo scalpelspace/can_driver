@@ -16,6 +16,11 @@ Low level simplified CAN bus (classic) communication drivers.
   * [2 CAN ID ScalpelSpace Node Scheme](#2-can-id-scalpelspace-node-scheme)
     * [2.1 Node ID Allocation Protocol](#21-node-id-allocation-protocol)
     * [2.2 Implementer Notes](#22-implementer-notes)
+  * [3 Generate Merged DBC python Script](#3-generate-merged-dbc-python-script)
+    * [3.1 Usage](#31-usage)
+    * [3.2 Repo File Format](#32-repo-file-format)
+    * [3.3 Node ID Patching](#33-node-id-patching)
+    * [3.4 Notable Behaviour](#34-notable-behaviour)
 <!-- TOC -->
 
 </details>
@@ -161,3 +166,61 @@ Reserved `message_id` values for the allocation protocol:
       nodes boot simultaneously. If stable node ID mapping matters, implement a
       custom strategy via the `node_id_strategy` function in
       [`can_id_allocator.c`](can_id_allocator.c).
+
+## 3 Generate Merged DBC python Script
+
+`generate_merged_dbc.py` clones multiple git repos and merges their root-level
+`.dbc` files into a single combined `.dbc`. Each repo represents one node on the
+ScalpelSpace CAN bus, and an optional node ID can be assigned per repo to patch
+all CAN IDs to match the ScalpelSpace ID scheme at merge time.
+
+### 3.1 Usage
+
+```shell
+python3 generate_merged_dbc.py --repos-file repos.txt --out project.dbc --workdir workspace
+```
+
+### 3.2 Repo File Format
+
+One entry per line: `url[@branch][#node_id]`
+
+```
+# Unassigned (node_id=0, CAN IDs left as-is).
+https://github.com/your_org/repo_a.git
+
+# Specific branch, unassigned.
+https://github.com/your_org/repo_b.git@main
+
+# Assigned node IDs.
+https://github.com/your_org/repo_c.git@main#1
+https://github.com/your_org/repo_d.git@main#2
+https://github.com/your_org/repo_d.git@main#3
+```
+
+Lines beginning with `#` are treated as comments.
+
+### 3.3 Node ID Patching
+
+When a node ID is specified, all CAN IDs in that repo's DBC are repacked using
+the ScalpelSpace scheme (`message_id << 5 | node_id`). If no node ID is given,
+CAN IDs are left unchanged (base DBC state, `node_id=0`).
+
+Device node names in `BU_` and transmitter fields are suffixed with the node ID
+(e.g. `MOMENTUM` → `MOMENTUM_02`) to uniquely identify each instance in the
+merged output. Message names and signal definitions are always preserved as-is
+from the source DBC.
+
+Shared role names (`LISTENER`, `REQUESTER`, `COMMANDER`) are never suffixed.
+
+### 3.4 Notable Behaviour
+
+- **Allocation protocol messages are never patched.** Messages with
+  `message_id >= 56` (CAN IDs 1792+) are reserved for the ScalpelSpace node ID
+  allocation protocol and are left unchanged regardless of the assigned node ID.
+- **Duplicate node IDs produce a warning.** Assigning the same node ID to
+  multiple repos will cause CAN ID collisions in the merged output.
+- **Conflicting CAN IDs keep the first occurrence.** If two repos define the
+  same CAN ID after patching, the first is kept and a warning is emitted.
+- **Same repo, multiple instances is supported.** The same repo URL can appear
+  multiple times with different node IDs to represent multiple identical devices
+  on the bus.
