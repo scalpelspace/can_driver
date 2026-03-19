@@ -11,6 +11,7 @@
   * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
   * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
   * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
+  * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
 <!-- TOC -->
 
 </details>
@@ -76,3 +77,18 @@
   [`can_id_allocator.c`](can_id_allocator.c) `can_rx_can_id_allocator_ack()`.
 - Fix `can_rx_can_id_allocatee_advertise` renamed to
   `can_rx_can_id_allocator_advertise` to correctly reflect owning module.
+
+---
+
+## [v0.3.3 (2026-03-18)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.3)
+
+- Add per-repo node ID support to `generate_merged_dbc.py`.
+    - Repo specs now accept `url[@branch][#node_id]` format.
+    - CAN IDs are patched at merge time using the ScalpelSpace ID scheme.
+    - Allocation protocol messages (message_id 56..63) are excluded from
+      patching.
+    - Transmitter node names in `BU_` and `BO_` lines are suffixed by node ID
+      (e.g. `MOMENTUM` -> `MOMENTUM_02`). Shared roles (`LISTENER`, `REQUESTER`,
+      `COMMANDER`) are not suffixed. Message names are always preserved as-is.
+    - Duplicate node ID assignments across repos produce a warning.
+    - Update related documentation.
