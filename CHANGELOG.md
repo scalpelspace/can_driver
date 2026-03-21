@@ -12,6 +12,7 @@
   * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
   * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
   * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
+  * [v0.3.4 (TBD)](#v034--tbd-)
 <!-- TOC -->
 
 </details>
@@ -92,3 +93,22 @@
       `COMMANDER`) are not suffixed. Message names are always preserved as-is.
     - Duplicate node ID assignments across repos produce a warning.
     - Update related documentation.
+
+---
+
+## [v0.3.4 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.4)
+
+- Implement initial assignment strategy allowing custom developer
+  implementations to Node ID assignment based on UID.
+    - Added strategy function pointer `node_id_assignment_strategy_t` to
+      `allocator_config_t`.
+    - If NULL, behaviour is unchanged (FIFO). Three built-in strategies
+      provided:
+        - `can_id_strategy_fifo`: assignment by discovery order (previous
+          hardcoded behaviour).
+        - `can_id_strategy_uid_ascending`: deterministic assignment sorted by
+          48-bit UID value.
+        - `can_id_strategy_uid_table`: fixed UID to Node ID lookup table, with
+          fallback sequential assignment for unknown nodes
+          (`can_id_strategy_uid_table_set` to configure).
+- `search_received_uids` marked static.
