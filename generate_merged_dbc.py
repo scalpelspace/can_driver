@@ -69,6 +69,7 @@ SHARED_NODE_ROLES = {"LISTENER", "REQUESTER", "COMMANDER"}
 
 MSG_START_RE = re.compile(r"^BO_\s+(\d+)\s+(\w+)\s*:\s*(\d+)\s+(\S+)")
 NODE_LINE_RE = re.compile(r"^BU_:\s*(.*)$")
+SG_LINE_RE = re.compile(r"^(\s*SG_\s+\w+\s*:.+\"[^\"]*\")\s+(\S+)$")
 
 
 def patch_can_id(can_id: int, node_id: int) -> int:
@@ -341,12 +342,14 @@ def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
 
         new_id = patch_can_id(old_id, node_id)
 
-        # Patch BO_ line: update CAN ID and suffix the transmitter node name.
+        # Patch transmitter/receivers.
         # Message name is preserved exactly as defined in the source DBC.
         new_block = []
         for line in block:
             m = MSG_START_RE.match(line)
             if m:
+                # Patch BO_ transmitter node names: update CAN ID and suffix the
+                # node name.
                 msg_name = m.group(2)
                 dlc = m.group(3)
                 transmitter = m.group(4)
@@ -354,6 +357,14 @@ def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
                     transmitter, transmitter
                 )
                 line = f"BO_ {new_id} {msg_name}: {dlc} {suffixed_transmitter}"
+            else:
+                # Patch SG_ receiver node names: suffix the node name.
+                sg_m = SG_LINE_RE.match(line)
+                if sg_m:
+                    sg_body = sg_m.group(1)
+                    receiver = sg_m.group(2)
+                    suffixed_receiver = node_name_map.get(receiver, receiver)
+                    line = f"{sg_body} {suffixed_receiver}"
             new_block.append(line)
 
         if new_id in patched.messages:
