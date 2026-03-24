@@ -115,4 +115,6 @@
 - Update `generate_merged_dbc.py` to support local DBC files.
     - Backwards compatible using the same repos file.
     - Update documentation accordingly.
+- Update `generate_merged_dbc.py` to fix missing signal receiver Node ID suffix
+  patching.
 - Fix minor documentation formatting.
