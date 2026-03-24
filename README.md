@@ -136,7 +136,7 @@ Reserved `message_id` values for the allocation protocol:
 |      56      | `DISCOVER`  | 31 (broadcast) |    0x71F    | Allocator opens discovery window.    |
 |      57      | `ADVERTISE` | 0 (unassigned) |    0x720    | Node broadcasts its UID hash48.      |
 |      58      | `ASSIGN`    | 31 (broadcast) |    0x75F    | Allocator assigns a UID a `node_id`. |
-|      59      | `ACK`       |    assigned    | 0x760–0x77F | Node confirms its assignment.        |
+|      59      | `ACK`       |    assigned    | 0x760-0x77F | Node confirms its assignment.        |
 
 `message_id` values 60..63 are reserved for future allocation use. Values
 1..55 are free for application messages.
@@ -182,20 +182,31 @@ python3 generate_merged_dbc.py --repos-file repos.txt --out project.dbc --workdi
 
 ### 3.2 Repo File Format
 
-One entry per line: `url[@branch][#node_id]`
+One entry per line, 2 possible options:
 
-```
-# Unassigned (node_id=0, CAN IDs left as-is).
-https://github.com/your_org/repo_a.git
-
-# Specific branch, unassigned.
-https://github.com/your_org/repo_b.git@main
-
-# Assigned node IDs.
-https://github.com/your_org/repo_c.git@main#1
-https://github.com/your_org/repo_d.git@main#2
-https://github.com/your_org/repo_d.git@main#3
-```
+1. `url[@branch][#node_id]`
+    ```
+    # Unassigned (node_id=0, CAN IDs left as-is).
+    https://github.com/your_org/repo_a.git
+    
+    # Specific branch, unassigned.
+    https://github.com/your_org/repo_b.git@main
+    
+    # Assigned node IDs.
+    https://github.com/your_org/repo_c.git@main#1
+    https://github.com/your_org/repo_d.git@main#2
+    https://github.com/your_org/repo_d.git@main#3
+    ```
+2. `dbc_file_path[#node_id]`
+    ```
+    # Unassigned (node_id=0, CAN IDs left as-is).
+    ./local/my_device.dbc
+    /absolute/path/to/other_device.dbc
+    
+    # Assigned node IDs.
+    ./local/my_device.dbc#1
+    /absolute/path/to/other_device.dbc#2
+    ```
 
 Lines beginning with `#` are treated as comments.
 
@@ -206,7 +217,7 @@ the ScalpelSpace scheme (`message_id << 5 | node_id`). If no node ID is given,
 CAN IDs are left unchanged (base DBC state, `node_id=0`).
 
 Device node names in `BU_` and transmitter fields are suffixed with the node ID
-(e.g. `MOMENTUM` → `MOMENTUM_02`) to uniquely identify each instance in the
+(e.g. `MOMENTUM` -> `MOMENTUM_02`) to uniquely identify each instance in the
 merged output. Message names and signal definitions are always preserved as-is
 from the source DBC.
 
@@ -214,6 +225,10 @@ Shared role names (`LISTENER`, `REQUESTER`, `COMMANDER`) are never suffixed.
 
 ### 3.4 Notable Behaviour
 
+- **Local DBC files are supported.** Entries ending in `.dbc` or resolving to
+  an existing file path are used directly without cloning. Node ID patching
+  applies identically to remote repos. Local and remote entries can be freely
+  mixed in the same repos file.
 - **Allocation protocol messages are never patched.** Messages with
   `message_id >= 56` (CAN IDs 1792+) are reserved for the ScalpelSpace node ID
   allocation protocol and are left unchanged regardless of the assigned node ID.

@@ -1,10 +1,14 @@
 """Merged DBC generator.
 
 Clone multiple git repos (each containing one or more .dbc files at the root
-directory) and merge them into a single merged .dbc file.
+directory) and/or source local DBC files and merge them into a single merged
+.dbc file.
 
 Each repo entry can optionally specify a branch and a node ID using the format:
     url[@branch][#node_id]
+
+Each file path entry can optionally specify a node ID using the format:
+    dbc_file_path[#node_id]
 
 Node ID must be in the assignable range (1..30). If omitted, defaults to 0
 (unassigned), and CAN IDs are left as-is (base DBC state).
@@ -22,6 +26,8 @@ Example:
     https://github.com/your_org/repo_c.git@main#1
     https://github.com/your_org/repo_d.git@main#2
     https://github.com/your_org/repo_d.git@main#3
+    ./local/my_device.dbc#4
+    /absolute/path/to/other_device.dbc#5
     ```
 
     Creates a merged DBC named "project.dbc" with:
@@ -29,6 +35,8 @@ Example:
       - repo_b messages (main) patched to node_id=0.
       - repo_c messages (main) patched to node_id=1.
       - repo_d messages (main) patched to node_id=2 and node_id=3 (2 instances).
+      - ./local/my_device.dbc messages patched to node_id=4.
+      - /absolute/path/to/other_device.dbc messages patched to node_id=5.
 """
 
 from __future__ import annotations
@@ -124,10 +132,13 @@ class RepoSpec:
     url: str
     branch: Optional[str]
     node_id: int  # 0 = unassigned (base DBC, no patching).
+    local_path: Optional[Path] = None  # Set if entry is a local file path.
 
 
 def _split_repo_spec(spec: str) -> RepoSpec:
-    """Parse a repo spec of the form url[@branch][#node_id]."""
+    """Parse a repo spec of the form url[@branch][#node_id] or
+    path/to/file.dbc[#node_id].
+    """
     node_id = NODE_ID_UNASSIGNED
 
     # Extract node_id suffix (#N).
@@ -142,6 +153,13 @@ def _split_repo_spec(spec: str) -> RepoSpec:
                 file=sys.stderr,
             )
             node_id = NODE_ID_UNASSIGNED
+
+    # Check if this is a local file path (ends in .dbc or exists on disk).
+    candidate = Path(spec.strip())
+    if candidate.suffix == ".dbc" or candidate.exists():
+        return RepoSpec(
+            url="", branch=None, node_id=node_id, local_path=candidate
+        )
 
     # Extract branch suffix (@branch).
     branch = None
@@ -496,48 +514,73 @@ def main() -> int:
                 seen_node_ids[spec.node_id] = spec.url
 
     # Clone/update repos.
-    repo_dirs: list[tuple[Path, RepoSpec]] = []
+    # Resolve repos: clone remote URLs, resolve local paths.
+    repo_dirs: list[tuple[Optional[Path], RepoSpec]] = []
     for idx, spec in enumerate(specs, start=1):
-        safe = re.sub(
-            r"[^A-Za-z0-9._-]+",
-            "_",
-            spec.url.strip().split("/")[-1].replace(".git", ""),
-        )
-        # Include node_id in dir name to support multi-instance of same repo.
-        dst = workdir / f"{idx:02d}_{safe}_n{spec.node_id:02d}"
-        print(
-            f"[INFO] Syncing {spec.url}"
-            + (f" (branch {spec.branch})" if spec.branch else "")
-            + f" -> node_id={spec.node_id}"
-        )
-        git_clone_or_update(spec.url, spec.branch, dst)
-        repo_dirs.append((dst, spec))
+        if spec.local_path is not None:
+            # Local DBC file - no cloning needed.
+            path = spec.local_path.resolve()
+            if not path.exists():
+                print(
+                    f"[ERROR] Local DBC not found: {path}",
+                    file=sys.stderr,
+                )
+                return 2
+            if not path.is_file() or path.suffix != ".dbc":
+                print(
+                    f"[ERROR] Local path is not a .dbc file: {path}",
+                    file=sys.stderr,
+                )
+                return 2
+            print(
+                f"[INFO] Using local DBC: {path}"
+                + f" -> node_id={spec.node_id}"
+            )
+            repo_dirs.append((None, spec))
+        else:
+            # Remote git repo - clone/update.
+            safe = re.sub(
+                r"[^A-Za-z0-9._-]+",
+                "_",
+                spec.url.strip().split("/")[-1].replace(".git", ""),
+            )
+            dst = workdir / f"{idx:02d}_{safe}_n{spec.node_id:02d}"
+            print(
+                f"[INFO] Syncing {spec.url}"
+                + (f" (branch {spec.branch})" if spec.branch else "")
+                + f" -> node_id={spec.node_id}"
+            )
+            git_clone_or_update(spec.url, spec.branch, dst)
+            repo_dirs.append((dst, spec))
 
     # Find and parse root-level DBCs, applying node ID patches.
     all_dbcs: list[Path] = []
-    for rd, _ in repo_dirs:
-        all_dbcs.extend(find_dbc_files_root_only(rd))
-
-    if not all_dbcs:
-        print(
-            "[ERROR] No root-level .dbc files found in repos.", file=sys.stderr
-        )
-        return 2
-
-    print(f"[INFO] Found {len(all_dbcs)} .dbc file(s)")
-
     docs: list[DBCDoc] = []
+
     for rd, spec in repo_dirs:
-        dbcs = find_dbc_files_root_only(rd)
-        for dbc_path in dbcs:
+        if spec.local_path is not None:
+            # Local file - use directly.
+            dbc_path = spec.local_path.resolve()
+            all_dbcs.append(dbc_path)
             print(
                 f"  - {dbc_path}"
                 + (f" [node_id={spec.node_id}]" if spec.node_id else "")
             )
             parsed = parse_dbc(dbc_path)
-            repo_name = dbc_path.stem
-            patched = apply_node_id(parsed, spec.node_id, repo_name)
+            patched = apply_node_id(parsed, spec.node_id, dbc_path.stem)
             docs.append(patched)
+        else:
+            # Cloned repo - find root-level DBCs.
+            dbcs = find_dbc_files_root_only(rd)
+            all_dbcs.extend(dbcs)
+            for dbc_path in dbcs:
+                print(
+                    f"  - {dbc_path}"
+                    + (f" [node_id={spec.node_id}]" if spec.node_id else "")
+                )
+                parsed = parse_dbc(dbc_path)
+                patched = apply_node_id(parsed, spec.node_id, dbc_path.stem)
+                docs.append(patched)
 
     # Use first DBC as header template.
     base_header, _ = parse_base_header(all_dbcs[0])
