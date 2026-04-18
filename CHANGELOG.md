@@ -118,3 +118,4 @@
 - Update `generate_merged_dbc.py` to fix missing signal receiver Node ID suffix
   patching.
 - Fix minor documentation formatting.
+- Rename `LICENSE.txt` to `LICENSE`.
