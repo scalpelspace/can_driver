@@ -12,7 +12,7 @@
   * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
   * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
   * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
-  * [v0.3.5 (TBD)](#v035--tbd-)
+  * [v0.3.5 (2026-04-18)](#v035--2026-04-18-)
 <!-- TOC -->
 
 </details>
@@ -96,7 +96,7 @@
 
 ---
 
-## [v0.3.5 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.5)
+## [v0.3.5 (2026-04-18)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.5)
 
 - Implement initial assignment strategy allowing custom developer
   implementations to Node ID assignment based on UID.
