@@ -13,6 +13,7 @@
   * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
   * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
   * [v0.3.5 (2026-04-18)](#v035--2026-04-18-)
+  * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
 <!-- TOC -->
 
 </details>
@@ -119,3 +120,10 @@
   patching.
 - Fix minor documentation formatting.
 - Rename `LICENSE.txt` to `LICENSE`.
+
+---
+
+## [v0.3.6 (2026-04-22)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.6)
+
+- Fix `sign_extend_u32()` to perform arithmetic (not logical) right shift so
+  negative signed signals decode correctly.

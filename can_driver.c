@@ -17,7 +17,7 @@ static int32_t sign_extend_u32(const uint32_t raw_value,
   if (length_bits == 0 || length_bits >= 32)
     return (int32_t)raw_value;
   const uint32_t shift = 32u - length_bits;
-  return (int32_t)((raw_value << shift) >> shift); // Right shift sign-extend.
+  return ((int32_t)(raw_value << shift)) >> shift; // Arithmetic sign-extend.
 }
 
 static uint32_t clamp_raw(double physical_value, const uint8_t length_bits,
