@@ -14,6 +14,7 @@
   * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
   * [v0.3.5 (2026-04-18)](#v035--2026-04-18-)
   * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
+  * [v0.3.7 (WIP)](#v037--wip-)
 <!-- TOC -->
 
 </details>
@@ -127,3 +128,13 @@
 
 - Fix `sign_extend_u32()` to perform arithmetic (not logical) right shift so
   negative signed signals decode correctly.
+
+---
+
+## [v0.3.7 (2026-05-01)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.7)
+
+- Reorder state machine logic so the allocation session completion callbacks
+  fire after state is set to IDLE.
+    - Previously, `allocatee_assigned_func` and `allocator_assigned_func` were
+      called before `allocatee_state`/`allocator_state` were set to IDLE. Now
+      the callbacks fire last, so state is already IDLE on callback entry.

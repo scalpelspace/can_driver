@@ -392,13 +392,13 @@ void can_id_allocator_state_machine(void) {
     // Transition state once all previously assigned nodes ACK.
     if (soft_assigned_nodes == assignment_acked_nodes) {
 
+      // State transition.
+      allocator_state = ALLOCATOR_IDLE;
+
       // Call assignment complete callback.
       config.allocator_assigned_func(discovered_uids_0, discovered_uids_1,
                                      discovered_uids_2, assigned_node_ids,
                                      assignment_acked_nodes);
-
-      // State transition.
-      allocator_state = ALLOCATOR_IDLE;
     }
     break;
 
