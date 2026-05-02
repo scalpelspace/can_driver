@@ -14,7 +14,8 @@
   * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
   * [v0.3.5 (2026-04-18)](#v035--2026-04-18-)
   * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
-  * [v0.3.7 (WIP)](#v037--wip-)
+  * [v0.3.7 (2026-05-01)](#v037--2026-05-01-)
+  * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
 <!-- TOC -->
 
 </details>
@@ -138,3 +139,15 @@
     - Previously, `allocatee_assigned_func` and `allocator_assigned_func` were
       called before `allocatee_state`/`allocator_state` were set to IDLE. Now
       the callbacks fire last, so state is already IDLE on callback entry.
+
+---
+
+## [v0.3.8 (2026-05-02)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.8)
+
+- Improve state machine logic to allow recovery from potential state hangs.
+    - Change return type of `can_rx_can_id_allocatee_discovery()` from `void` to
+      `bool`.
+        - Returns true only when a valid DISCOVER is accepted and the session
+          starts.
+    - Remove state guards in `can_id_allocator_start()` and
+      `can_id_allocatee_start()` to allow for a forced reset from any state.

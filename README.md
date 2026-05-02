@@ -10,17 +10,19 @@ Low level simplified CAN bus (classic) communication drivers.
   <summary>Table of Contents</summary>
 
 <!-- TOC -->
+
 * [can_driver](#can_driver)
-  * [1 CAN Bus Drivers](#1-can-bus-drivers)
-    * [1.1 CAN Message Signalize Size Limit](#11-can-message-signalize-size-limit)
-  * [2 CAN ID ScalpelSpace Node Scheme](#2-can-id-scalpelspace-node-scheme)
-    * [2.1 Node ID Allocation Protocol](#21-node-id-allocation-protocol)
-    * [2.2 Implementer Notes](#22-implementer-notes)
-  * [3 Generate Merged DBC python Script](#3-generate-merged-dbc-python-script)
-    * [3.1 Usage](#31-usage)
-    * [3.2 Repo File Format](#32-repo-file-format)
-    * [3.3 Node ID Patching](#33-node-id-patching)
-    * [3.4 Notable Behaviour](#34-notable-behaviour)
+    * [1 CAN Bus Drivers](#1-can-bus-drivers)
+        * [1.1 CAN Message Signalize Size Limit](#11-can-message-signalize-size-limit)
+    * [2 CAN ID ScalpelSpace Node Scheme](#2-can-id-scalpelspace-node-scheme)
+        * [2.1 Node ID Allocation Protocol](#21-node-id-allocation-protocol)
+        * [2.2 Implementer Notes](#22-implementer-notes)
+    * [3 Generate Merged DBC python Script](#3-generate-merged-dbc-python-script)
+        * [3.1 Usage](#31-usage)
+        * [3.2 Repo File Format](#32-repo-file-format)
+        * [3.3 Node ID Patching](#33-node-id-patching)
+        * [3.4 Notable Behaviour](#34-notable-behaviour)
+
 <!-- TOC -->
 
 </details>
@@ -152,9 +154,16 @@ Reserved `message_id` values for the allocation protocol:
   Plan for this in startup sequencing.
 
 - **No built-in timeouts.** If an expected message never arrives (e.g. a node
-  fails to ACK), the state machine stalls indefinitely. Implementers should
-  call `can_id_allocator_start()` / `can_id_allocatee_start()` from a
-  watchdog or apply an external deadline if startup reliability is required.
+  fails to ACK), the state machine stalls indefinitely. Both
+  `can_id_allocator_start()` and `can_id_allocatee_start()` are safe to call
+  from any state. They fully reset the state machine and begin a fresh session.
+  Use an external watchdog or deadline timer to call them if startup reliability
+  is required.
+    - **Allocator:** arm the deadline timer at the `can_id_allocator_start()`
+      call site, discovery begins immediately.
+    - **Allocatee:** arm the deadline timer when
+      `can_rx_can_id_allocatee_discovery()` returns `true`, which confirms that
+      a valid session is in flight.
 
 - **Single allocator per network.** Running more than one allocator
   simultaneously will produce conflicting DISCOVER and ASSIGN messages.

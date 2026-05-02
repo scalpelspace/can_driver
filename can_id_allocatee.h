@@ -59,8 +59,13 @@ typedef struct allocatee_config {
  *
  * @param header
  * @param data
+ *
+ * @return Whether a valid discovery message was accepted and session started.
+ * @retval true -> Discovery accepted, application should arm its deadline
+ *                 timer from this point.
+ * @retval false -> Message ignored (wrong state, bad header, or null args).
  */
-void can_rx_can_id_allocatee_discovery(const can_header_t *header,
+bool can_rx_can_id_allocatee_discovery(const can_header_t *header,
                                        const uint8_t *data);
 
 /**
@@ -73,13 +78,16 @@ void can_rx_can_id_allocatee_assignment(const can_header_t *header,
                                         const uint8_t *data);
 
 /**
- * @brief Begin CAN ID allocate state machine.
+ * @brief Begin (or restart) the CAN ID allocatee state machine.
+ *
+ * Safe to call from any state. If the allocatee is currently mid-session
+ * (e.g. stalled in ALLOCATEE_AWAIT_ASSIGNMENT), calling this resets all state
+ * and waits for the next DISCOVER broadcast. The session_id and node_id are
+ * cleared so stale in-flight messages are discarded.
  *
  * @param allocatee
  *
- * @return Success status.
- * @retval true -> Allocatee state machine started successfully.
- * @retval false -> Error.
+ * @return Always true.
  */
 bool can_id_allocatee_start(allocatee_config_t allocatee);
 

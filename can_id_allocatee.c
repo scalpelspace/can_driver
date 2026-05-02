@@ -38,33 +38,33 @@ static uint8_t node_id = 0;    // Assigned node ID.
 /** Public functions. *********************************************************/
 
 bool can_id_allocatee_start(const allocatee_config_t allocatee) {
-  if (allocatee_state == ALLOCATEE_IDLE) {
-    config = allocatee; // Update configuration.
-    allocatee_state = ALLOCATEE_AWAIT_DISCOVERY;
-    return true;
-  }
-  return false;
+  config = allocatee; // Update configuration.
+  node_id = 0;
+  session_id = 0;
+  allocatee_state = ALLOCATEE_AWAIT_DISCOVERY;
+  return true;
 }
 
-void can_rx_can_id_allocatee_discovery(const can_header_t *header,
+bool can_rx_can_id_allocatee_discovery(const can_header_t *header,
                                        const uint8_t *data) {
   const can_message_t msg =
       allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_DISCOVER];
 
   if (!header || !data)
-    return;
+    return false;
   if (allocatee_state != ALLOCATEE_AWAIT_DISCOVERY)
-    return;
+    return false;
 
   // Ensure CAN header consistency.
   if (header->standard_id != msg.message_id || header->dlc != msg.dlc)
-    return;
+    return false;
 
   // Decode field.
   const uint8_t rx_session_id = (uint8_t)decode_signal(&msg.signals[0], data);
 
   session_id = rx_session_id;                    // Store session ID.
   allocatee_state = ALLOCATEE_DISCOVERY_STARTED; // Transition state.
+  return true;
 }
 
 void can_rx_can_id_allocatee_assignment(const can_header_t *header,

@@ -84,13 +84,16 @@ void can_rx_can_id_allocator_ack(const can_header_t *header,
                                  const uint8_t *data);
 
 /**
- * @brief Begin CAN ID allocator state machine.
+ * @brief Begin (or restart) the CAN ID allocator state machine.
+ *
+ * Safe to call from any state. If the allocator is currently mid-session
+ * (e.g. stalled in ALLOCATOR_AWAIT_ACK), calling this resets all state and
+ * begins a fresh discovery session with an incremented session_id, causing
+ * in-flight messages from the previous session to be discarded.
  *
  * @param allocator
  *
- * @return Success status.
- * @retval true -> Allocator state machine started successfully.
- * @retval false -> Error.
+ * @return Always true.
  */
 bool can_id_allocator_start(allocator_config_t allocator);
 

@@ -89,15 +89,12 @@ static void node_id_strategy(void) {
 /** Public functions. *********************************************************/
 
 bool can_id_allocator_start(const allocator_config_t allocator) {
-  if (allocator_state == ALLOCATOR_IDLE) {
-    config = allocator; // Update configuration.
-    allocator_state = ALLOCATOR_DISCOVER;
-    discovered_nodes = 0;
-    soft_assigned_nodes = 0;
-    assignment_acked_nodes = 0;
-    return true;
-  }
-  return false;
+  config = allocator; // Update configuration.
+  allocator_state = ALLOCATOR_DISCOVER;
+  discovered_nodes = 0;
+  soft_assigned_nodes = 0;
+  assignment_acked_nodes = 0;
+  return true;
 }
 
 bool can_id_allocator_end_discovery(void) {
