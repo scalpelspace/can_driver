@@ -19,10 +19,6 @@
 extern "C" {
 #endif
 
-/** Definitions. **************************************************************/
-
-#define MAX_SIGNALS_PER_MESSAGE 8 // Maximum signals allowed per message.
-
 /** Public types. *************************************************************/
 
 typedef struct {
@@ -52,6 +48,19 @@ typedef enum {
 } can_byte_order_t;
 
 /**
+ * @brief Enumeration for CAN signal multiplexing roles.
+ *
+ * Simple multiplexing only (single selector per message, no nested or
+ * extended multiplexing).
+ */
+typedef enum {
+  CAN_MUX_NONE = 0,     // Always-present (non-multiplexed) signal.
+  CAN_MUX_SELECTOR = 1, // Multiplexor switch signal (DBC "M").
+  CAN_MUX_DEPENDENT = 2 // Multiplexed signal (DBC "mN"), valid only when the
+                        // selector's raw value equals mux_value.
+} can_mux_role_t;
+
+/**
  * @brief Struct defining a CAN message signal.
  *
  * This struct describes an individual signal within a CAN message.
@@ -64,10 +73,13 @@ typedef struct {
   uint8_t bit_length;          // Length of the signal in bits.
   can_byte_order_t byte_order; // Byte order: little or big endian.
   bool is_signed;              // Mark for signed or unsigned type.
-  float scale;     // Scaling factor to convert raw value to physical value.
-  float offset;    // Offset to apply after scaling.
-  float min_value; // Minimum physical value (optional validation).
-  float max_value; // Maximum physical value (optional validation).
+  float scale;                 // Scaling factor.
+  float offset;                // Offset to apply after scaling.
+  float min_value;             // Minimum physical value (optional validation).
+  float max_value;             // Maximum physical value (optional validation).
+  can_mux_role_t mux_role;     // Multiplexing role (CAN_MUX_NONE if unused).
+  uint32_t mux_value; // Selector raw value activating this signal. Only
+                      // meaningful when mux_role == CAN_MUX_DEPENDENT.
 } can_signal_t;
 
 /**
@@ -75,7 +87,8 @@ typedef struct {
  *
  * This struct holds the static configuration for a CAN message, including its
  * ID, optional name, data length, and the associated handler functions. Signals
- * for the message are statically allocated in a fixed-size array.
+ * for the message are referenced via a pointer to a statically allocated,
+ * exactly-sized const array (typically emitted by the DBC code generator).
  */
 typedef struct {
   const char *name;    // Optional message name (for debugging).
@@ -84,8 +97,8 @@ typedef struct {
   uint8_t dlc;      // Data Length Code.
   can_rx_handler_t rx_handler; // Function pointer for receiving (decoding).
   can_tx_handler_t tx_handler; // Function pointer for transmitting (encoding).
-  can_signal_t signals[MAX_SIGNALS_PER_MESSAGE]; // Statically allocation.
-  uint8_t signal_count; // Number of valid signals in the array.
+  const can_signal_t *signals; // Statically allocated signal array.
+  uint8_t signal_count;        // Number of valid signals in the array.
 } can_message_t;
 
 /** Public functions. *********************************************************/
@@ -123,6 +136,34 @@ void pack_signal_raw32(const can_signal_t *signal, uint8_t *data,
  * @return The decoded physical signal value.
  */
 double decode_signal(const can_signal_t *signal, const uint8_t *data);
+
+/**
+ * @brief Extract the raw (unscaled, unsigned) multiplexor value of a message.
+ *
+ * Searches the message's signals for the CAN_MUX_SELECTOR signal and extracts
+ * its raw value from the payload. Scale/offset are intentionally not applied,
+ * mux_value comparisons are defined on raw selector values.
+ *
+ * @param message Pointer to the CAN message configuration.
+ * @param data Pointer to the raw CAN message payload.
+ * @param out_mux_value Output raw multiplexor value.
+ *
+ * @return True on success, False if message has no selector or NULL args.
+ */
+bool can_message_get_mux_value(const can_message_t *message,
+                               const uint8_t *data, uint32_t *out_mux_value);
+
+/**
+ * @brief Check if a signal is active (present) for a given multiplexor value.
+ *
+ * Non-multiplexed signals and the selector itself are always active.
+ *
+ * @param signal Pointer to the CAN signal configuration.
+ * @param mux_value Current raw multiplexor value of the message.
+ *
+ * @return True if the signal should be decoded/encoded, else False.
+ */
+bool can_signal_is_active(const can_signal_t *signal, uint32_t mux_value);
 
 /** CPP guard close. **********************************************************/
 

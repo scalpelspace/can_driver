@@ -16,6 +16,7 @@
   * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
   * [v0.3.7 (2026-05-01)](#v037--2026-05-01-)
   * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
+  * [v0.4.0 (TBD)](#v040--tbd-)
 <!-- TOC -->
 
 </details>
@@ -151,3 +152,12 @@
           starts.
     - Remove state guards in `can_id_allocator_start()` and
       `can_id_allocatee_start()` to allow for a forced reset from any state.
+
+---
+
+## [v0.4.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.4.0)
+
+- Added simple DBC multiplexing support (selector/dependent signal roles plus
+  mux helpers).
+- Replaced fixed 8-slot signal arrays with per-message exact-size const arrays
+  via pointer.

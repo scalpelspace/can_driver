@@ -45,8 +45,12 @@ def parse_dbc(filename: str):
     number = r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?"
     # Account for numbers with "e" for scientific notation.
 
+    # Optional multiplexer indicator between signal name and colon:
+    #   "M"    = multiplexor (selector) signal.
+    #   "m<N>" = multiplexed signal, active when selector raw value == N.
+    #   "m<N>M" = extended multiplexing (NOT supported, raises an error).
     sg_pattern = re.compile(
-        rf"^\s*SG_\s+(\w+)\s*:\s*"
+        rf"^\s*SG_\s+(\w+)\s*(M|m\d+M?)?\s*:\s*"
         rf"(\d+)\|(\d+)@(\d)([+-])\s*"
         rf"\(\s*({number})\s*,\s*({number})\s*\)\s*"
         rf"\[\s*({number})\s*\|\s*({number})\s*\]\s*"
@@ -86,9 +90,30 @@ def parse_dbc(filename: str):
                 m = sg_pattern.match(line)
                 if m:
                     signal_name = m.group(1)
-                    start_bit = int(m.group(2))
-                    bit_length = int(m.group(3))
-                    dbc_byte_order = int(m.group(4))
+
+                    # Parse simple multiplexing role.
+                    mux_token = m.group(2)  # None, "M", "m<N>" or "m<N>M".
+                    if mux_token is None:
+                        mux_role = "CAN_MUX_NONE"
+                        mux_value = 0
+                    elif mux_token == "M":
+                        mux_role = "CAN_MUX_SELECTOR"
+                        mux_value = 0
+                    elif mux_token.endswith("M"):
+                        print(
+                            "[ERROR] Extended multiplexing (m<N>M) is not "
+                            "supported:",
+                            line,
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
+                    else:
+                        mux_role = "CAN_MUX_DEPENDENT"
+                        mux_value = int(mux_token[1:])
+
+                    start_bit = int(m.group(3))
+                    bit_length = int(m.group(4))
+                    dbc_byte_order = int(m.group(5))
                     # DBC: 1 = Intel (little-endian), 0 = Motorola (big-endian).
 
                     # Map DBC byte order to C based enum:
@@ -100,13 +125,13 @@ def parse_dbc(filename: str):
                     else:
                         byte_order = "CAN_BIG_ENDIAN"
 
-                    is_signed = m.group(5) == "-"
-                    scale = float(m.group(6))
-                    offset = float(m.group(7))
-                    min_value = float(m.group(8))
-                    max_value = float(m.group(9))
-                    unit = m.group(10)  # Can be an empty string.
-                    receiver = m.group(11)
+                    is_signed = m.group(6) == "-"
+                    scale = float(m.group(7))
+                    offset = float(m.group(8))
+                    min_value = float(m.group(9))
+                    max_value = float(m.group(10))
+                    unit = m.group(11)  # Can be an empty string.
+                    receiver = m.group(12)
 
                     signal = {
                         "name": signal_name,
@@ -119,6 +144,8 @@ def parse_dbc(filename: str):
                         "min_value": min_value,
                         "max_value": max_value,
                         "unit": unit,
+                        "mux_role": mux_role,
+                        "mux_value": mux_value,
                     }
                     current_msg["signals"].append(signal)
                 else:
@@ -130,6 +157,32 @@ def parse_dbc(filename: str):
         # Append the final message, if any.
         if current_msg is not None:
             messages.append(current_msg)
+
+    # Validate simple multiplexing rules per message.
+    for msg in messages:
+        selector_count = sum(
+            1 for sig in msg["signals"] if sig["mux_role"] == "CAN_MUX_SELECTOR"
+        )
+        dependent_count = sum(
+            1
+            for sig in msg["signals"]
+            if sig["mux_role"] == "CAN_MUX_DEPENDENT"
+        )
+        if selector_count > 1:
+            print(
+                f"[ERROR] Message \"{msg['name']}\" has multiple multiplexor "
+                "(M) signals.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        if dependent_count > 0 and selector_count == 0:
+            print(
+                f"[ERROR] Message \"{msg['name']}\" has multiplexed (m<N>) "
+                "signals but no multiplexor (M) signal.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
     return messages
 
 
@@ -154,6 +207,36 @@ def generate_source(messages, output_filename: str):
         out.write(f'#include "{output_filename}.h"\n\n')
 
         out.write(
+            "/** Private variables. ********************************************************/\n\n"
+        )
+
+        # Per-message, exactly-sized static signal arrays (flash resident).
+        for msg in messages:
+            if len(msg["signals"]) == 0:
+                continue  # No array needed, message references NULL.
+            out.write(
+                f"static const can_signal_t {msg['name']}_signals"
+                f"[{len(msg['signals'])}] = {{\n"
+            )
+            for sig in msg["signals"]:
+                out.write("    {\n")
+                out.write(f"        .name = \"{sig['name']}\",\n")
+                out.write(f"        .start_bit = {sig['start_bit']},\n")
+                out.write(f"        .bit_length = {sig['bit_length']},\n")
+                out.write(f"        .byte_order = {sig['byte_order']},\n")
+                out.write(
+                    f"        .is_signed = {str(sig['is_signed']).lower()},\n"
+                )
+                out.write(f"        .scale = {sig['scale']}f,\n")
+                out.write(f"        .offset = {sig['offset']}f,\n")
+                out.write(f"        .min_value = {sig['min_value']}f,\n")
+                out.write(f"        .max_value = {sig['max_value']}f,\n")
+                out.write(f"        .mux_role = {sig['mux_role']},\n")
+                out.write(f"        .mux_value = {sig['mux_value']},\n")
+                out.write("    },\n")
+            out.write("};\n\n")
+
+        out.write(
             "/** Public variables. *********************************************************/\n\n"
         )
         out.write("const can_message_t dbc_messages[] = {\n")
@@ -169,42 +252,11 @@ def generate_source(messages, output_filename: str):
             out.write(
                 "        .tx_handler = 0, // (can_tx_handler_t)my_tx_handler_func,\n"
             )
-            out.write(f"        .signal_count = {len(msg['signals'])},\n")
-            out.write("        .signals =\n            {\n")
             if len(msg["signals"]) == 0:
-                out.write("\n            },\n")
+                out.write("        .signals = 0,\n")
             else:
-                for sig in msg["signals"]:
-                    out.write("                {\n")
-                    out.write(
-                        f"                    .name = \"{sig['name']}\",\n"
-                    )
-                    out.write(
-                        f"                    .start_bit = {sig['start_bit']},\n"
-                    )
-                    out.write(
-                        f"                    .bit_length = {sig['bit_length']},\n"
-                    )
-                    out.write(
-                        f"                    .byte_order = {sig['byte_order']},\n"
-                    )
-                    out.write(
-                        f"                    .is_signed = {str(sig['is_signed']).lower()},\n"
-                    )
-                    out.write(
-                        f"                    .scale = {sig['scale']}f,\n"
-                    )
-                    out.write(
-                        f"                    .offset = {sig['offset']}f,\n"
-                    )
-                    out.write(
-                        f"                    .min_value = {sig['min_value']}f,\n"
-                    )
-                    out.write(
-                        f"                    .max_value = {sig['max_value']}f,\n"
-                    )
-                    out.write("                },\n")
-                out.write("            },\n")
+                out.write(f"        .signals = {msg['name']}_signals,\n")
+            out.write(f"        .signal_count = {len(msg['signals'])},\n")
             out.write("    },\n")
         out.write("};\n")
 
