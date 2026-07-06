@@ -16,7 +16,7 @@
   * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
   * [v0.3.7 (2026-05-01)](#v037--2026-05-01-)
   * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
-  * [v0.4.0 (TBD)](#v040--tbd-)
+  * [v0.4.0 (2026-07-06)](#v040--2026-07-06-)
 <!-- TOC -->
 
 </details>
@@ -155,7 +155,7 @@
 
 ---
 
-## [v0.4.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.4.0)
+## [v0.4.0 (2026-07-06)](https://github.com/scalpelspace/can_driver/releases/tag/v0.4.0)
 
 - Update [`generate_can_defs.py`](generate_can_defs.py) for design and
   performance improvements.
@@ -163,7 +163,6 @@
       plus mux helpers).
     - Replaced fixed 8-slot signal arrays with per-message exact-size const
       arrays via pointer.
-    - Update [can_id_allocation_dbc.c](can_id_allocation_dbc.c) accordingly.
-- Update [
-  `generate_merged_dbc.py`](generate_merged_dbc.py) to suffix message names with
-  node ID in merged DBC to ensure unique names across node instances.
+    - Update [`can_id_allocation_dbc.c`](can_id_allocation_dbc.c) accordingly.
+- Update [`generate_merged_dbc.py`](generate_merged_dbc.py) to suffix message
+  names with node ID in merged DBC to ensure unique names across node instances.
