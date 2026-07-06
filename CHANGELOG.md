@@ -160,11 +160,10 @@
 - Update [`generate_can_defs.py`](generate_can_defs.py) for design and
   performance improvements.
     - Added simple DBC multiplexing support (selector/dependent signal roles
-      plus
-      mux helpers).
+      plus mux helpers).
     - Replaced fixed 8-slot signal arrays with per-message exact-size const
-      arrays
-      via pointer.
+      arrays via pointer.
+    - Update [can_id_allocation_dbc.c](can_id_allocation_dbc.c) accordingly.
 - Update [
   `generate_merged_dbc.py`](generate_merged_dbc.py) to suffix message names with
   node ID in merged DBC to ensure unique names across node instances.

@@ -93,9 +93,8 @@ Local code DBCs are implemented in the following files
 2. [can_id_allocation_dbc.c](can_id_allocation_dbc.c)
 
 > **Note:**
-> 1. After generation, `dbc_messages` and `dbc_message_count` are manually named
-     `allocation_dbc` and `allocation_dbc_count` to avoid symbol conflicts with
-     per-device DBC files in the same build.
+> 1. After generation, `dbc_messages` is manually named `allocation_dbc` to
+     avoid symbol conflicts with per-device DBC files in the same build.
 > 2. The source DBC retains the per-node ACK records as the true definition. The
      generated code DBC uses a deliberate reduction, only maintaining the Node 0
      ACK record.
