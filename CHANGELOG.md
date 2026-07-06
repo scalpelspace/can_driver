@@ -157,7 +157,14 @@
 
 ## [v0.4.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.4.0)
 
-- Added simple DBC multiplexing support (selector/dependent signal roles plus
-  mux helpers).
-- Replaced fixed 8-slot signal arrays with per-message exact-size const arrays
-  via pointer.
+- Update [`generate_can_defs.py`](generate_can_defs.py) for design and
+  performance improvements.
+    - Added simple DBC multiplexing support (selector/dependent signal roles
+      plus
+      mux helpers).
+    - Replaced fixed 8-slot signal arrays with per-message exact-size const
+      arrays
+      via pointer.
+- Update [
+  `generate_merged_dbc.py`](generate_merged_dbc.py) to suffix message names with
+  node ID in merged DBC to ensure unique names across node instances.

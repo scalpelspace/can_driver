@@ -69,7 +69,23 @@ SHARED_NODE_ROLES = {"LISTENER", "REQUESTER", "COMMANDER"}
 
 MSG_START_RE = re.compile(r"^BO_\s+(\d+)\s+(\w+)\s*:\s*(\d+)\s+(\S+)")
 NODE_LINE_RE = re.compile(r"^BU_:\s*(.*)$")
-SG_LINE_RE = re.compile(r"^(\s*SG_\s+\w+\s*:.+\"[^\"]*\")\s+(\S+)$")
+# Optional multiplexer token (M, m<N> or m<N>M) between signal name and colon.
+SG_LINE_RE = re.compile(
+    r"^(\s*SG_\s+\w+\s*(?:M|m\d+M?)?\s*:.+\"[^\"]*\")\s+(\S+)$"
+)
+
+# Non-BO_ lines that reference a CAN ID as their first numeric field. These
+# must be ID-patched alongside their message during node ID assignment.
+ID_REF_LINE_RES = [
+    re.compile(r"^(VAL_\s+)(\d+)(\s+.*)$"),
+    re.compile(r"^(CM_\s+SG_\s+)(\d+)(\s+.*)$"),
+    re.compile(r"^(CM_\s+BO_\s+)(\d+)(\s+.*)$"),
+    re.compile(r"^(BA_\s+\"[^\"]*\"\s+SG_\s+)(\d+)(\s+.*)$"),
+    re.compile(r"^(BA_\s+\"[^\"]*\"\s+BO_\s+)(\d+)(\s+.*)$"),
+    re.compile(r"^(SIG_VALTYPE_\s+)(\d+)(\s+.*)$"),
+    re.compile(r"^(BO_TX_BU_\s+)(\d+)(\s+.*)$"),
+    re.compile(r"^(SG_MUL_VAL_\s+)(\d+)(\s+.*)$"),
+]
 
 
 def patch_can_id(can_id: int, node_id: int) -> int:
@@ -296,9 +312,10 @@ def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
     Allocation protocol messages (message_id >= 56) are never patched -
     these are managed by the allocation protocol itself.
 
-    Node names in BU_ are suffixed with the node_id (e.g. NODE_NAME ->
-    NODE_NAME_02). Message names are always preserved as-is from the source DBC.
-    Transmitter fields on BO_ lines are updated to match the suffixed node name.
+    Node names in BU_ and message names are suffixed with the node_id (e.g.
+    NODE_NAME -> NODE_NAME_02, message_name -> message_name_02) to uniquely
+    identify each node instance in the merged output. Transmitter fields on BO_
+    lines are updated to match the suffixed node name.
 
     Args:
         doc: Parsed DBC document.
@@ -306,13 +323,26 @@ def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
         repo_name: Used for warning messages on collision.
 
     Returns:
-        New DBCDoc with patched CAN IDs, suffixed node names, original message names.
+        New DBCDoc with patched CAN IDs, suffixed node and message names.
     """
     if node_id == NODE_ID_UNASSIGNED:
         return doc  # No patching needed.
 
     patched = DBCDoc()
-    patched.other_lines = doc.other_lines
+
+    # Patch CAN ID references in non-message lines (VAL_, CM_, BA_, etc.) so
+    # they follow their message to its repacked CAN ID.
+    patched.other_lines = OrderedSet()
+    for ln in doc.other_lines.items:
+        for pattern in ID_REF_LINE_RES:
+            m = pattern.match(ln)
+            if m:
+                ref_id = int(m.group(2))
+                ref_message_id = (ref_id >> MESSAGE_ID_SHIFT) & 0x3F
+                if ref_message_id < 56:  # Skip allocation protocol IDs.
+                    ln = f"{m.group(1)}{patch_can_id(ref_id, node_id)}{m.group(3)}"
+                break
+        patched.other_lines.add(ln)
 
     # Build suffixed node name mapping: NODE_NAME -> NODE_NAME_02.
     node_suffix = f"_{node_id:02d}"
@@ -348,9 +378,9 @@ def apply_node_id(doc: DBCDoc, node_id: int, repo_name: str) -> DBCDoc:
         for line in block:
             m = MSG_START_RE.match(line)
             if m:
-                # Patch BO_ transmitter node names: update CAN ID and suffix the
-                # node name.
-                msg_name = m.group(2)
+                # Patch BO_ line: update CAN ID, suffix the message name and
+                # the transmitter node name.
+                msg_name = f"{m.group(2)}{node_suffix}"
                 dlc = m.group(3)
                 transmitter = m.group(4)
                 suffixed_transmitter = node_name_map.get(

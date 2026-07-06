@@ -225,10 +225,10 @@ When a node ID is specified, all CAN IDs in that repo's DBC are repacked using
 the ScalpelSpace scheme (`message_id << 5 | node_id`). If no node ID is given,
 CAN IDs are left unchanged (base DBC state, `node_id=0`).
 
-Device node names in `BU_` and transmitter fields are suffixed with the node ID
-(e.g. `MOMENTUM` -> `MOMENTUM_02`) to uniquely identify each instance in the
-merged output. Message names and signal definitions are always preserved as-is
-from the source DBC.
+Device node names in `BU_`, transmitter fields and message names are suffixed
+with the node ID (e.g. `MOMENTUM` -> `MOMENTUM_02`, `mcu_temperature` ->
+`mcu_temperature_02`) to uniquely identify each instance in the merged output.
+Signal definitions are always preserved as-is from the source DBC.
 
 Shared role names (`LISTENER`, `REQUESTER`, `COMMANDER`) are never suffixed.
 
