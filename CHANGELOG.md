@@ -6,18 +6,20 @@
   <summary>Table of Contents</summary>
 
 <!-- TOC -->
+
 * [Changelog](#changelog)
-  * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
-  * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
-  * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
-  * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
-  * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
-  * [v0.3.5 (2026-04-18)](#v035--2026-04-18-)
-  * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
-  * [v0.3.7 (2026-05-01)](#v037--2026-05-01-)
-  * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
-  * [v0.4.0 (2026-07-06)](#v040--2026-07-06-)
-  * [v0.4.1 (TBD)](#v041--tbd-)
+    * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
+    * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
+    * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
+    * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
+    * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
+    * [v0.3.5 (2026-04-18)](#v035--2026-04-18-)
+    * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
+    * [v0.3.7 (2026-05-01)](#v037--2026-05-01-)
+    * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
+    * [v0.4.0 (2026-07-06)](#v040--2026-07-06-)
+    * [v0.4.1 (TBD)](#v041--tbd-)
+
 <!-- TOC -->
 
 </details>
@@ -56,14 +58,14 @@
     - Previously used a custom structure, updated to use index enum design.
 
 > **Post Release Notes:**
-> - The `v0.3.0` entry in `CHANGELOG.md` uses the incorrect hyperlink.
-    Incorrectly linked to `v0.2.1`, but should be to `v0.3.0`.
+> - The v0.3.0 entry in `CHANGELOG.md` uses the incorrect hyperlink. Incorrectly
+    linked to v0.2.1, but should be to v0.3.0.
 
 ---
 
 ## [v0.3.2 (2026-03-16)](https://github.com/scalpelspace/can_driver/releases/tag/v0.3.2)
 
-- Fix `CHANGELOG.md` for bad hyperlink on release `v0.3.0`.
+- Fix `CHANGELOG.md` for bad hyperlink on release v0.3.0.
 - Reduce allocation DBC memory usage by removing per-node ACK message records.
     - Previously each of the 30 assignable node IDs had a dedicated ACK DBC
       entry. Now only a reference ACK entry (node ID 0) is generated in code.
