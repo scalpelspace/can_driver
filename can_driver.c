@@ -67,10 +67,13 @@ static uint32_t extract_raw32(const can_signal_t *signal, const uint8_t *data) {
 
 static double raw_to_physical(const uint32_t raw_value,
                               const can_signal_t *signal) {
-  const int32_t v = signal->is_signed
-                        ? sign_extend_u32(raw_value, signal->bit_length)
-                        : (int32_t)raw_value;
-  return (double)v * signal->scale + signal->offset;
+  if (signal->is_signed) {
+    return (double)sign_extend_u32(raw_value, signal->bit_length) *
+               signal->scale +
+           signal->offset;
+  }
+  // Unsigned: convert directly (a 32-bit raw value may exceed INT32_MAX).
+  return (double)raw_value * signal->scale + signal->offset;
 }
 
 /** Public functions. *********************************************************/

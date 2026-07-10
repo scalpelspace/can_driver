@@ -46,10 +46,12 @@ typedef void (*get_uid_hash48_func_t)(uint16_t *uid0, uint16_t *uid1,
 typedef void (*allocatee_assigned_func_t)(can_node_id_t node_id);
 
 typedef struct allocatee_config {
-  can_tx_func_t can_tx_func; // CAN message transmit function pointer.
+  can_tx_func_t can_tx_func; // CAN message transmit function pointer. Required.
   get_uid_hash48_func_t get_uid_hash48_func; // Get UID hash48 function pointer.
+                                             // Required.
   allocatee_assigned_func_t
-      allocatee_assigned_func; // Allocatee success callback.
+      allocatee_assigned_func; // Allocatee success callback. Optional (NULL
+                               // to skip).
 } allocatee_config_t;
 
 /** Public functions. *********************************************************/
@@ -87,7 +89,10 @@ void can_rx_can_id_allocatee_assignment(const can_header_t *header,
  *
  * @param allocatee
  *
- * @return Always true.
+ * @return Success status.
+ * @retval true -> Allocatee started.
+ * @retval false -> Invalid configuration (can_tx_func or get_uid_hash48_func
+ *                  is NULL).
  */
 bool can_id_allocatee_start(allocatee_config_t allocatee);
 

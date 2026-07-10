@@ -129,8 +129,9 @@ at 255) so that messages from a previous session are discarded.
 Node identity is established using a **48-bit UID hash**, split across three
 16-bit segments. Implementers must supply a `get_uid_hash48_func_t` callback
 that returns values derived from hardware (e.g. MCU die ID). The hash must be
-stable across resets and unique per device, collisions will cause assignment
-failures.
+stable across resets and unique per device. Colliding hashes cause assignment
+failure: the second node to advertise is treated as a duplicate of the first and
+is silently excluded from the session.
 
 Reserved `message_id` values for the allocation protocol:
 
@@ -170,12 +171,31 @@ Reserved `message_id` values for the allocation protocol:
   simultaneously will produce conflicting DISCOVER and ASSIGN messages.
   Arbitrate allocator role at the application layer if needed.
 
-- (Currently) **Node ID assignment order is FIFO.** Nodes are assigned IDs in
-  the order their ADVERTISE messages are received, starting from `node_id = 1`.
-    - This means assignment is not deterministic across power cycles if multiple
-      nodes boot simultaneously. If stable node ID mapping matters, implement a
-      custom strategy via the `node_id_strategy` function in
-      [`can_id_allocator.c`](can_id_allocator.c).
+- **Node ID assignment order defaults to FIFO.** When
+  `allocator_config_t::strategy` is NULL, nodes are assigned IDs in the order
+  their ADVERTISE messages are received, starting from `node_id = 1`.
+    - FIFO assignment is not deterministic across power cycles if multiple nodes
+      boot simultaneously. If stable node ID mapping matters, use one of the
+      built-in strategies (`can_id_strategy_uid_ascending` or
+      `can_id_strategy_uid_table`) or provide a custom
+      `node_id_assignment_strategy_t` via `allocator_config_t::strategy`.
+    - Nodes left unresolved by a strategy (`node_id = 0`, e.g.
+      `can_id_strategy_uid_table` with no free Node IDs remaining) are skipped:
+      no ASSIGN is transmitted for them and they do not join the session.
+      Allocatees also reject ASSIGN messages carrying a reserved Node ID
+      (0 or 31) as a defence against a misbehaving allocator.
+
+- **Configurations are validated on start.** `can_id_allocator_start()` and
+  `can_id_allocatee_start()` return `false` (without starting) if required
+  function pointers are NULL: `can_tx_func` for both, plus `get_uid_hash48_func`
+  for the allocatee. The success callbacks (`allocator_assigned_func`,
+  `allocatee_assigned_func`) are optional and may be NULL.
+
+- **Duplicate messages within a session are ignored.** Retransmitted ADVERTISE
+  and ACK messages (e.g. from CAN controller automatic retransmission) are
+  detected by UID and dropped, so they do not consume discovery slots or
+  double-count acknowledgements. Nodes re-advertise normally in response to a
+  new DISCOVER since each `can_id_allocator_start()` resets discovery state.
 
 ## 3 Generate Merged DBC python Script
 

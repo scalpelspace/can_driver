@@ -18,6 +18,7 @@
   * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
   * [v0.4.0 (2026-07-06)](#v040--2026-07-06-)
   * [v0.4.1 (2026-07-10)](#v041--2026-07-10-)
+  * [v0.5.0 (TBD)](#v050--tbd-)
 <!-- TOC -->
 
 </details>
@@ -180,3 +181,58 @@
 - Add defensive input guards to `physical_to_raw()` for NULL signal and zero bit
   length inputs (previously undefined behaviour), now returns 0.
 - Fix `decode_signal()` to return `double` literals (`0.0f` -> `0.0`).
+
+---
+
+## [v0.5.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.5.0)
+
+- Fix out-of-bounds write in `can_id_allocator.c` on ACK from Node ID 30.
+    - Replace `assigned_node_ids` (indexed by Node ID, which overflowed the
+      30-entry array at Node ID 30) with `acked_node_ids`, index-aligned with
+      the discovered UID arrays.
+    - The `allocator_assigned_func` callback now receives ACKed Node IDs
+      index-aligned with the UID arrays, matching the documented strategy
+      convention. Previously it received UID indexes indexed by Node ID.
+    - The callback `node_count` parameter now reports the discovered node count
+      (the valid length of all passed arrays); entries that did not ACK hold
+      Node ID 0.
+- Fix unsigned 32-bit signal decoding in `can_driver.c`.
+    - `raw_to_physical()` cast unsigned raw values through `int32_t`, so 32-bit
+      unsigned signals above `INT32_MAX` decoded as negative. Unsigned values
+      now convert directly to `double`. Signals of 31 bits or fewer are
+      unaffected.
+- Fix allocator UID search (`search_received_uids`) to only scan discovered
+  entries.
+    - Previously all 30 slots were scanned, so an ACK carrying UID 0 could
+      match an empty (zero-initialized) slot and count as a valid assignment.
+- Add duplicate ADVERTISE and ACK rejection in `can_id_allocator.c`.
+    - Retransmitted ADVERTISE messages previously consumed extra discovery slots
+      and received multiple Node ID assignments, deadlocking the allocator in
+      the AWAIT_ACK state (ACK count could never reach the assigned count).
+    - Retransmitted ACK messages previously double-counted, with the same
+      deadlock result.
+- Fix assignment handling of nodes unresolved by the assignment strategy.
+    - The allocator now skips ASSIGN transmission for entries left at Node ID 0
+      (e.g. `can_id_strategy_uid_table` with a full bus).
+    - The allocatee now rejects ASSIGN messages carrying reserved Node IDs
+      (0 = unassigned, 31 = broadcast) or values above the assignable range.
+- Validate required function pointers in `can_id_allocator_start()` and
+  `can_id_allocatee_start()`.
+    - Return `false` if `can_tx_func` (allocator/allocatee) or
+      `get_uid_hash48_func` (allocatee) is NULL, instead of hard faulting
+      mid-protocol. Previously documented as "Always true".
+    - Success callbacks (`allocator_assigned_func`, `allocatee_assigned_func`)
+      are now optional and skipped when NULL.
+- Reset ACK tracking state on `can_id_allocator_start()` for clean session
+  restarts.
+- Guard the allocatee ACK transmission on `can_id_pack()` success to avoid
+  transmitting a malformed CAN ID (defensive, unreachable after the assignment
+  range validation above).
+- Update `README.md` implementer notes for the above behaviours and fix stale
+  strategy documentation.
+    - Custom assignment strategies are configured via
+      `allocator_config_t::strategy` (previously incorrectly referenced the
+      private `node_id_strategy` helper).
+    - Fix `can_id_strategy_uid_table` fallback description in
+      `can_id_allocator.h`: unknown nodes receive the lowest free Node IDs
+      (previously claimed IDs start above the highest table-mapped ID).
