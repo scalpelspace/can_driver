@@ -236,3 +236,4 @@
     - Fix `can_id_strategy_uid_table` fallback description in
       `can_id_allocator.h`: unknown nodes receive the lowest free Node IDs
       (previously claimed IDs start above the highest table-mapped ID).
+- Add `.gitattributes`.
