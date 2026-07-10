@@ -18,7 +18,7 @@
   * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
   * [v0.4.0 (2026-07-06)](#v040--2026-07-06-)
   * [v0.4.1 (2026-07-10)](#v041--2026-07-10-)
-  * [v0.5.0 (TBD)](#v050--tbd-)
+  * [v0.5.0 (2026-07-10)](#v050--2026-07-10-)
 <!-- TOC -->
 
 </details>
@@ -184,7 +184,7 @@
 
 ---
 
-## [v0.5.0 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.5.0)
+## [v0.5.0 (2026-07-10)](https://github.com/scalpelspace/can_driver/releases/tag/v0.5.0)
 
 - Fix out-of-bounds write in `can_id_allocator.c` on ACK from Node ID 30.
     - Replace `assigned_node_ids` (indexed by Node ID, which overflowed the
