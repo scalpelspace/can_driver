@@ -10,19 +10,17 @@ Low level simplified CAN bus (classic) communication drivers.
   <summary>Table of Contents</summary>
 
 <!-- TOC -->
-
 * [can_driver](#can_driver)
-    * [1 CAN Bus Drivers](#1-can-bus-drivers)
-        * [1.1 CAN Message Signalize Size Limit](#11-can-message-signalize-size-limit)
-    * [2 CAN ID ScalpelSpace Node Scheme](#2-can-id-scalpelspace-node-scheme)
-        * [2.1 Node ID Allocation Protocol](#21-node-id-allocation-protocol)
-        * [2.2 Implementer Notes](#22-implementer-notes)
-    * [3 Generate Merged DBC python Script](#3-generate-merged-dbc-python-script)
-        * [3.1 Usage](#31-usage)
-        * [3.2 Repo File Format](#32-repo-file-format)
-        * [3.3 Node ID Patching](#33-node-id-patching)
-        * [3.4 Notable Behaviour](#34-notable-behaviour)
-
+  * [1 CAN Bus Drivers](#1-can-bus-drivers)
+    * [1.1 CAN Message Signalize Size Limit](#11-can-message-signalize-size-limit)
+  * [2 CAN ID ScalpelSpace Node Scheme](#2-can-id-scalpelspace-node-scheme)
+    * [2.1 Node ID Allocation Protocol](#21-node-id-allocation-protocol)
+    * [2.2 Implementer Notes](#22-implementer-notes)
+  * [3 Generate Merged DBC python Script](#3-generate-merged-dbc-python-script)
+    * [3.1 Usage](#31-usage)
+    * [3.2 Repo File Format](#32-repo-file-format)
+    * [3.3 Node ID Patching](#33-node-id-patching)
+    * [3.4 Notable Behaviour](#34-notable-behaviour)
 <!-- TOC -->
 
 </details>
@@ -47,6 +45,9 @@ The CAN driver is intended to integrate with a `C` based DBC structure.
 
     - These generated files declare the message and signals in the appropriate
       type structs.
+    - Pass `--symbol-name <name>` to rename the generated `can_message_t` array
+      (default: `dbc_messages`). Required when linking multiple generated DBC
+      files into one build to avoid symbol conflicts.
 
 ### 1.1 CAN Message Signalize Size Limit
 
@@ -93,8 +94,9 @@ Local code DBCs are implemented in the following files
 2. [can_id_allocation_dbc.c](can_id_allocation_dbc.c)
 
 > **Note:**
-> 1. After generation, `dbc_messages` is manually named `allocation_dbc` to
-     avoid symbol conflicts with per-device DBC files in the same build.
+> 1. The message array is generated with `--symbol-name allocation_dbc` to avoid
+     symbol conflicts with per-device DBC files in the same build (the default
+     symbol name is `dbc_messages`).
 > 2. The source DBC retains the per-node ACK records as the true definition. The
      generated code DBC uses a deliberate reduction, only maintaining the Node 0
      ACK record.

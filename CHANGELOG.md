@@ -6,20 +6,18 @@
   <summary>Table of Contents</summary>
 
 <!-- TOC -->
-
 * [Changelog](#changelog)
-    * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
-    * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
-    * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
-    * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
-    * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
-    * [v0.3.5 (2026-04-18)](#v035--2026-04-18-)
-    * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
-    * [v0.3.7 (2026-05-01)](#v037--2026-05-01-)
-    * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
-    * [v0.4.0 (2026-07-06)](#v040--2026-07-06-)
-    * [v0.4.1 (TBD)](#v041--tbd-)
-
+  * [v0.1.0 (2026-01-13)](#v010--2026-01-13-)
+  * [v0.2.0 (2026-03-08)](#v020--2026-03-08-)
+  * [v0.3.0 (2026-03-10)](#v030--2026-03-10-)
+  * [v0.3.2 (2026-03-16)](#v032--2026-03-16-)
+  * [v0.3.3 (2026-03-18)](#v033--2026-03-18-)
+  * [v0.3.5 (2026-04-18)](#v035--2026-04-18-)
+  * [v0.3.6 (2026-04-22)](#v036--2026-04-22-)
+  * [v0.3.7 (2026-05-01)](#v037--2026-05-01-)
+  * [v0.3.8 (2026-05-02)](#v038--2026-05-02-)
+  * [v0.4.0 (2026-07-06)](#v040--2026-07-06-)
+  * [v0.4.1 (TBD)](#v041--tbd-)
 <!-- TOC -->
 
 </details>
@@ -164,6 +162,21 @@
 
 ---
 
-## [v0.4.1 (TBD)](https://github.com/scalpelspace/can_driver/releases/tag/v0.4.1)
+## [v0.4.1 (2026-07-10)](https://github.com/scalpelspace/can_driver/releases/tag/v0.4.1)
 
 - Cleanup `CHANGELOG.md` for formatting and syntax consistency.
+- Update `.gitignore` to exclude DBC tooling outputs and local inputs
+  (`workspace/`, `project.dbc`, `repos.txt`).
+- Add optional `--symbol-name` argument to `generate_can_defs.py` to set the
+  generated `can_message_t` array symbol name (default: `dbc_messages`).
+    - Formalizes the previously manual rename to `allocation_dbc` used to avoid
+      symbol conflicts when linking alongside a device DBC in the same build.
+    - Update documentation accordingly.
+- Update `generate_merged_dbc.py` to error cleanly when no `.dbc` files are
+  found (previously raised an unhandled `IndexError`).
+- Fix reserved identifier header guard in `can_driver.h`
+  (`__CAN_DRIVER_H` -> `CAN_DRIVER__CAN_DRIVER_H`) for consistency with other
+  headers.
+- Add defensive input guards to `physical_to_raw()` for NULL signal and zero bit
+  length inputs (previously undefined behaviour), now returns 0.
+- Fix `decode_signal()` to return `double` literals (`0.0f` -> `0.0`).

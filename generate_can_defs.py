@@ -186,7 +186,7 @@ def parse_dbc(filename: str):
     return messages
 
 
-def generate_source(messages, output_filename: str):
+def generate_source(messages, output_filename: str, symbol_name: str):
     """Generate source file with extern array of CAN message definitions."""
     with open(f"{output_filename}.c", "w") as out:
         out.write(
@@ -239,7 +239,7 @@ def generate_source(messages, output_filename: str):
         out.write(
             "/** Public variables. *********************************************************/\n\n"
         )
-        out.write("const can_message_t dbc_messages[] = {\n")
+        out.write(f"const can_message_t {symbol_name}[] = {{\n")
         for msg in messages:
             out.write("    {\n")
             out.write(f"        .name = \"{msg['name']}\",\n")
@@ -273,7 +273,7 @@ def generate_dbc_index_enum(messages, output_filename: str) -> str:
     return "".join(lines)
 
 
-def generate_header(messages, output_filename: str):
+def generate_header(messages, output_filename: str, symbol_name: str):
     """Generate header file with appropriate extern definitions."""
     with open(f"{output_filename}.h", "w") as out:
         out.write(
@@ -312,7 +312,7 @@ def generate_header(messages, output_filename: str):
         out.write(
             "/** Public variables. *********************************************************/\n\n"
         )
-        out.write("extern const can_message_t dbc_messages[];\n\n")
+        out.write(f"extern const can_message_t {symbol_name}[];\n\n")
 
         out.write(
             "/** CPP guard close. **********************************************************/\n\n"
@@ -337,6 +337,13 @@ def main():
         "output_file",
         help="Path to the output header file",
     )
+    parser.add_argument(
+        "--symbol-name",
+        default="dbc_messages",
+        help="Name of the generated can_message_t array symbol. Set a unique "
+        "name per DBC to avoid symbol conflicts when linking multiple "
+        "generated DBC files into one build (default: dbc_messages)",
+    )
     args = parser.parse_args()
 
     # Parse DBC.
@@ -346,8 +353,8 @@ def main():
         sys.exit(1)
 
     # Generate header and source file.
-    generate_header(messages, args.output_file)
-    generate_source(messages, args.output_file)
+    generate_header(messages, args.output_file, args.symbol_name)
+    generate_source(messages, args.output_file, args.symbol_name)
 
     # Output message.
     print(

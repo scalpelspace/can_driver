@@ -76,7 +76,7 @@ static double raw_to_physical(const uint32_t raw_value,
 /** Public functions. *********************************************************/
 
 uint32_t physical_to_raw(double physical_value, const can_signal_t *signal) {
-  if (signal->scale == 0.0) {
+  if (!signal || signal->bit_length == 0 || signal->scale == 0.0) {
     return 0;
   }
 
@@ -129,9 +129,9 @@ void pack_signal_raw32(const can_signal_t *signal, uint8_t *data,
 
 double decode_signal(const can_signal_t *signal, const uint8_t *data) {
   if (!signal || !data)
-    return 0.0f;
+    return 0.0;
   if (signal->bit_length == 0)
-    return 0.0f;
+    return 0.0;
 
   // Phys = raw * scale + offset.
   return raw_to_physical(extract_raw32(signal, data), signal);

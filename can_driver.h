@@ -4,8 +4,8 @@
  *******************************************************************************
  */
 
-#ifndef __CAN_DRIVER_H
-#define __CAN_DRIVER_H
+#ifndef CAN_DRIVER__CAN_DRIVER_H
+#define CAN_DRIVER__CAN_DRIVER_H
 
 /** Includes. *****************************************************************/
 

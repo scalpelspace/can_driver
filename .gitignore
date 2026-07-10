@@ -1,4 +1,15 @@
 ################################################################################
+# can_driver.gitignore
+#
+# Generated and scratch outputs from the DBC tooling in this repo.
+################################################################################
+
+# generate_merged_dbc.py outputs and local inputs.
+workspace/
+project.dbc
+repos.txt
+
+################################################################################
 # devenv.gitignore
 #
 # General Dev Environments.

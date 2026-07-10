@@ -623,6 +623,13 @@ def main() -> int:
                 patched = apply_node_id(parsed, spec.node_id, dbc_path.stem)
                 docs.append(patched)
 
+    if not all_dbcs:
+        print(
+            "[ERROR] No .dbc files found in any repo root or local path.",
+            file=sys.stderr,
+        )
+        return 2
+
     # Use first DBC as header template.
     base_header, _ = parse_base_header(all_dbcs[0])
 
