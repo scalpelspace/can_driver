@@ -270,9 +270,6 @@
       the generated code DBC keeps only the Node 0 record. This is the reduction
       already used for ACK, the Node ID bits are set at runtime via bit
       operations.
-    - `CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ADVERTISE` renamed to
-      `CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ADVERTISE_00`, backwards compatibility
-      loss.
 - Add `allocatee_config_t::alloc_mode` and `allocatee_config_t::node_id`.
     - `node_id` seeds the Node ID the allocatee starts with (0 = unassigned), so
       a node holding an ID across a reset advertises it immediately.

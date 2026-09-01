@@ -169,8 +169,8 @@ void can_id_allocatee_state_machine(void) {
     }
 
     // Pack signals and send.
-    // Use ADVERTISE_00 as a signal-definition template, patch the message ID.
-    msg = allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ADVERTISE_00];
+    // Use ADVERTISE as a signal-definition template, patch the message ID.
+    msg = allocation_dbc[CAN_ID_ALLOCATION_DBC_IDX_NODE_ID_ADVERTISE];
     msg.message_id = (uint32_t)advertise_id;
     pack_signal_raw32(&msg.signals[0], tx_data, uid_0);
     pack_signal_raw32(&msg.signals[1], tx_data, uid_1);
