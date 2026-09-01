@@ -64,10 +64,10 @@ To ensure ecosystem functionality, ScalpelSpace specific node devices use a
 custom CAN ID standard. Building off the 11-bit classic CAN ID structure, 2
 fields are allocated to support message arbitration and node identification.
 
-1. `message_id`: High level message type to classify general data content.
-   (bits 10..5, 6-bit field, range 0..63).
-2. `node_id`: Individual device node on the network.
-   (bits 4..0, 5-bit field, range 0..31).
+1. `message_id`: High level message type to classify general data content. (bits
+   10..5, 6-bit field, range 0..63).
+2. `node_id`: Individual device node on the network. (bits 4..0, 5-bit field,
+   range 0..31).
     - `0`: Reserved for "unassigned".
     - `31`: Reserved for "broadcast".
     - Allows up to 30 unique reporting devices on a single network.
@@ -97,9 +97,9 @@ Local code DBCs are implemented in the following files
 > 1. The message array is generated with `--symbol-name allocation_dbc` to avoid
      symbol conflicts with per-device DBC files in the same build (the default
      symbol name is `dbc_messages`).
-> 2. The source DBC retains the per-node ACK records as the true definition. The
-     generated code DBC uses a deliberate reduction, only maintaining the Node 0
-     ACK record.
+> 2. The source DBC retains the per-node ADVERTISE and ACK records as the true
+     definition. The generated code DBC uses a deliberate reduction, only
+     maintaining the Node 0 ADVERTISE and ACK records.
 
 To create a merged DBC file from multiple sources (git repos)
 [generate_merged_dbc.py](generate_merged_dbc.py) is used.
@@ -115,7 +115,9 @@ Allocator                          Allocatee(s)
     |                                   |
     |--- DISCOVER (broadcast) --------> |  Allocator opens discovery window.
     |                                   |
-    | <---------- ADVERTISE (each) -----|  Each node replies with a UID hash48.
+    | <---------- ADVERTISE (each) -----|  Every node replies with a UID hash48,
+    |                                   |  its current `node_id` and its
+    |                                   |  `alloc_mode`.
     |                                   |
     |--- ASSIGN (broadcast, per UID) -> |  Allocator assigns `node_id` per UID.
     |                                   |
@@ -123,7 +125,7 @@ Allocator                          Allocatee(s)
     |                                   |
 ```
 
-Each discovery run is tagged with an incrementing `session_id` (uint8, wraps
+Each discovery run is tagged with an incrementing `session_id` (uint8_t, wraps
 at 255) so that messages from a previous session are discarded.
 
 Node identity is established using a **48-bit UID hash**, split across three
@@ -138,22 +140,35 @@ Reserved `message_id` values for the allocation protocol:
 | `message_id` | Name        |   `node_id`    | Full CAN ID | Description                          |
 |:------------:|-------------|:--------------:|:-----------:|--------------------------------------|
 |      56      | `DISCOVER`  | 31 (broadcast) |    0x71F    | Allocator opens discovery window.    |
-|      57      | `ADVERTISE` | 0 (unassigned) |    0x720    | Node broadcasts its UID hash48.      |
+|      57      | `ADVERTISE` |    current     | 0x720-0x73F | Node broadcasts its UID hash48.      |
 |      58      | `ASSIGN`    | 31 (broadcast) |    0x75F    | Allocator assigns a UID a `node_id`. |
 |      59      | `ACK`       |    assigned    | 0x760-0x77F | Node confirms its assignment.        |
 
-`message_id` values 60..63 are reserved for future allocation use. Values
-1..55 are free for application messages.
+ADVERTISE carries the `node_id` the sending node currently holds, so a node that
+has never been assigned advertises at 0x720 (`CAN_ID_NODE_ID_UNASSIGNED`). Byte
+7 of the payload is `alloc_mode`:
+
+| `alloc_mode` | Name               | Meaning                                        |
+|:------------:|--------------------|------------------------------------------------|
+|      0       | `reassignable`     | Accepts a new `node_id` (default).             |
+|      1       | `not reassignable` | Holds a fixed `node_id`, refuses reassignment. |
+
+Only bit 0 is defined, bits 1..7 are reserved and transmitted as 0. Value 0
+means "reassignable" so that firmware predating the field, which transmitted
+byte 7 as a zeroed reserved byte, still decodes correctly.
+
+`message_id` values 60..63 are reserved for future allocation use. Values 1..55
+are free for application messages.
 
 ### 2.2 Implementer Notes
 
-- **Single network instance only.** All allocator and allocatee state is held
-  in module-level statics. Only one instance of each can run per build target.
+- **Single network instance only.** All allocator and allocatee state is held in
+  module-level statics. Only one instance of each can run per build target.
 
-- **Discovery window is manually closed.** The allocator does not use a
-  fixed timer to end discovery. The host application must call
-  `can_id_allocator_end_discovery()` when it decides the window is over.
-  Plan for this in startup sequencing.
+- **Discovery window is manually closed.** The allocator does not use a fixed
+  timer to end discovery. The host application must call
+  `can_id_allocator_end_discovery()` when it decides the window is over. Plan
+  for this in startup sequencing.
 
 - **No built-in timeouts.** If an expected message never arrives (e.g. a node
   fails to ACK), the state machine stalls indefinitely. Both
@@ -171,9 +186,31 @@ Reserved `message_id` values for the allocation protocol:
   simultaneously will produce conflicting DISCOVER and ASSIGN messages.
   Arbitrate allocator role at the application layer if needed.
 
+- **Every node answers DISCOVER, including assigned ones.** A node that already
+  holds a Node ID returns to awaiting discovery after ACKing, and advertises
+  again on the next DISCOVER using its current Node ID in the CAN ID. This is
+  what lets the allocator see which Node IDs are already in use instead of
+  handing out an ID that is already taken.
+    - The allocatee starts with `allocatee_config_t::node_id` (0 = unassigned),
+      so a node that keeps its ID across a reset can advertise it immediately.
+
+- **Nodes can refuse reassignment.** An allocatee configured with
+  `allocatee_config_t::alloc_mode = CAN_ALLOC_MODE_NOT_REASSIGNABLE` advertises
+  that it holds a fixed Node ID. The allocator marks that Node ID reserved,
+  removes it from the pool offered to the assignment strategy, and sends no
+  ASSIGN for that node. Such a node never ACKs, so it is reported through
+  `allocator_assigned_func` with the Node ID it advertised.
+    - A node that refuses reassignment must be told which ID it holds, so
+      `can_id_allocatee_start()` rejects `CAN_ALLOC_MODE_NOT_REASSIGNABLE`
+      combined with `node_id = 0`.
+    - Two nodes hardcoded to the same Node ID is a wiring/configuration error
+      the protocol cannot resolve. Both are marked reserved and neither is
+      reassigned.
+
 - **Node ID assignment order defaults to FIFO.** When
-  `allocator_config_t::strategy` is NULL, nodes are assigned IDs in the order
-  their ADVERTISE messages are received, starting from `node_id = 1`.
+  `allocator_config_t::strategy` is NULL, nodes are assigned the lowest free
+  Node IDs in the order their ADVERTISE messages are received, starting from
+  `node_id = 1` and skipping any ID held by a reserved node.
     - FIFO assignment is not deterministic across power cycles if multiple nodes
       boot simultaneously. If stable node ID mapping matters, use one of the
       built-in strategies (`can_id_strategy_uid_ascending` or
@@ -182,14 +219,21 @@ Reserved `message_id` values for the allocation protocol:
     - Nodes left unresolved by a strategy (`node_id = 0`, e.g.
       `can_id_strategy_uid_table` with no free Node IDs remaining) are skipped:
       no ASSIGN is transmitted for them and they do not join the session.
-      Allocatees also reject ASSIGN messages carrying a reserved Node ID
-      (0 or 31) as a defence against a misbehaving allocator.
+      Allocatees also reject ASSIGN messages carrying a reserved Node ID (0 or
+        31) as a defence against a misbehaving allocator.
+    - Custom strategies receive a `node_id_assignment_ctx_t` describing the
+      session: the discovered UID arrays, which entries are reserved, and a
+      `reserved_mask` bitmap of the Node IDs already in use. The allocator drops
+      any assignment that lands on a reserved Node ID or falls outside the
+      assignable range.
 
 - **Configurations are validated on start.** `can_id_allocator_start()` and
   `can_id_allocatee_start()` return `false` (without starting) if required
   function pointers are NULL: `can_tx_func` for both, plus `get_uid_hash48_func`
   for the allocatee. The success callbacks (`allocator_assigned_func`,
   `allocatee_assigned_func`) are optional and may be NULL.
+    - `can_id_allocatee_start()` also rejects an undefined `alloc_mode` and a
+      `node_id` above the assignable range (31 = broadcast and up).
 
 - **Duplicate messages within a session are ignored.** Retransmitted ADVERTISE
   and ACK messages (e.g. from CAN controller automatic retransmission) are
@@ -255,10 +299,10 @@ Shared role names (`LISTENER`, `REQUESTER`, `COMMANDER`) are never suffixed.
 
 ### 3.4 Notable Behaviour
 
-- **Local DBC files are supported.** Entries ending in `.dbc` or resolving to
-  an existing file path are used directly without cloning. Node ID patching
-  applies identically to remote repos. Local and remote entries can be freely
-  mixed in the same repos file.
+- **Local DBC files are supported.** Entries ending in `.dbc` or resolving to an
+  existing file path are used directly without cloning. Node ID patching applies
+  identically to remote repos. Local and remote entries can be freely mixed in
+  the same repos file.
 - **Allocation protocol messages are never patched.** Messages with
   `message_id >= 56` (CAN IDs 1792+) are reserved for the ScalpelSpace node ID
   allocation protocol and are left unchanged regardless of the assigned node ID.

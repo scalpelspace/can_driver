@@ -39,12 +39,229 @@ BU_: ALLOCATOR ALLOCATEE
 BO_ 1823 node_id_discover: 1 ALLOCATOR
  SG_ session_id : 0|8@1+ (1,0) [0|255] ""  ALLOCATEE
 
-BO_ 1824 node_id_advertise: 8 ALLOCATEE
+BO_ 1824 node_id_advertise_00: 8 ALLOCATEE
  SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
  SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
  SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
  SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
- SG_ RESERVED_ADVERTISE : 56|8@1+ (1,0) [0|255] ""  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1825 node_id_advertise_01: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1826 node_id_advertise_02: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1827 node_id_advertise_03: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1828 node_id_advertise_04: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1829 node_id_advertise_05: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1830 node_id_advertise_06: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1831 node_id_advertise_07: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1832 node_id_advertise_08: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1833 node_id_advertise_09: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1834 node_id_advertise_10: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1835 node_id_advertise_11: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1836 node_id_advertise_12: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1837 node_id_advertise_13: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1838 node_id_advertise_14: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1839 node_id_advertise_15: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1840 node_id_advertise_16: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1841 node_id_advertise_17: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1842 node_id_advertise_18: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1843 node_id_advertise_19: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1844 node_id_advertise_20: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1845 node_id_advertise_21: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1846 node_id_advertise_22: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1847 node_id_advertise_23: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1848 node_id_advertise_24: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1849 node_id_advertise_25: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1850 node_id_advertise_26: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1851 node_id_advertise_27: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1852 node_id_advertise_28: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1853 node_id_advertise_29: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1854 node_id_advertise_30: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
+
+BO_ 1855 node_id_advertise_31: 8 ALLOCATEE
+ SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATOR
+ SG_ uid_hash48_1 : 16|16@1+ (1,0) [0|65535] "hash48_1"  ALLOCATOR
+ SG_ uid_hash48_2 : 32|16@1+ (1,0) [0|65535] "hash48_2"  ALLOCATOR
+ SG_ session_id : 48|8@1+ (1,0) [0|255] "session_id"  ALLOCATOR
+ SG_ alloc_mode : 56|8@1+ (1,0) [0|255] "alloc_mode"  ALLOCATOR
 
 BO_ 1887 node_id_assign: 8 ALLOCATOR
  SG_ uid_hash48_0 : 0|16@1+ (1,0) [0|65535] "hash48_0"  ALLOCATEE

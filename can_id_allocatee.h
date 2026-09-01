@@ -52,12 +52,22 @@ typedef struct allocatee_config {
   allocatee_assigned_func_t
       allocatee_assigned_func; // Allocatee success callback. Optional (NULL
                                // to skip).
+  can_alloc_mode_t alloc_mode; // Advertised reassignment policy. Optional
+                               // (0 = CAN_ALLOC_MODE_REASSIGNABLE default).
+  can_node_id_t node_id;       // Node ID held at start. Optional for a
+                               // reassignable node (0 = unassigned), required
+                               // (1..30) when alloc_mode is
+                               // CAN_ALLOC_MODE_NOT_REASSIGNABLE.
 } allocatee_config_t;
 
 /** Public functions. *********************************************************/
 
 /**
  * @brief CAN RX callback function for allocatee discovery message processing.
+ *
+ * Accepted whenever the allocatee is idle between sessions, including after a
+ * Node ID has already been assigned. Every node answers DISCOVER so that the
+ * allocator sees the Node IDs already in use on the bus.
  *
  * @param header
  * @param data
@@ -73,6 +83,9 @@ bool can_rx_can_id_allocatee_discovery(const can_header_t *header,
 /**
  * @brief CAN RX callback function for allocatee assignment message processing.
  *
+ * Ignored by nodes configured as CAN_ALLOC_MODE_NOT_REASSIGNABLE, they keep
+ * the Node ID they were configured with.
+ *
  * @param header
  * @param data
  */
@@ -84,15 +97,18 @@ void can_rx_can_id_allocatee_assignment(const can_header_t *header,
  *
  * Safe to call from any state. If the allocatee is currently mid-session
  * (e.g. stalled in ALLOCATEE_AWAIT_ASSIGNMENT), calling this resets all state
- * and waits for the next DISCOVER broadcast. The session_id and node_id are
- * cleared so stale in-flight messages are discarded.
+ * and waits for the next DISCOVER broadcast. The session_id is cleared and the
+ * node_id is reset to allocatee_config_t::node_id so stale in-flight messages
+ * are discarded.
  *
  * @param allocatee
  *
  * @return Success status.
  * @retval true -> Allocatee started.
  * @retval false -> Invalid configuration (can_tx_func or get_uid_hash48_func
- *                  is NULL).
+ *                  is NULL, alloc_mode is not a defined value, node_id is
+ *                  above the assignable range, or node_id is 0 while
+ *                  alloc_mode is CAN_ALLOC_MODE_NOT_REASSIGNABLE).
  */
 bool can_id_allocatee_start(allocatee_config_t allocatee);
 

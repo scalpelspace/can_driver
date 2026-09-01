@@ -80,7 +80,7 @@ static const can_signal_t node_id_advertise_signals[5] = {
         .mux_value = 0,
     },
     {
-        .name = "RESERVED_ADVERTISE",
+        .name = "alloc_mode",
         .start_bit = 56,
         .bit_length = 8,
         .byte_order = CAN_LITTLE_ENDIAN,
